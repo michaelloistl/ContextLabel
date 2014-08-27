@@ -19,7 +19,8 @@ let contextLabel = ContextLabel(frame: CGRectMake(0, 0, 320, 100))
 contextLabel.text = "ContextLabel is a Swift drop-in replacement for UILabel that supports selectable @UserHandle, #Hashtags and links https://github.com/michaelloistl/ContextLabel"
 contextLabel.delegate = self
 
-view.addSubview(contextLabel)```
+view.addSubview(contextLabel)
+```
 
 ## Demo
 The Repository includes a Xcode project that shows a simple use of the label in a storyboard with examples for implementing tappable links.
