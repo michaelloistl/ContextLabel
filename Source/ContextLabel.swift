@@ -9,6 +9,10 @@
 import Foundation
 import UIKit
 
+protocol ContextLabelDelegate {
+    func contextLabel(contextLabel: ContextLabel, didSelectText: String, inRange: NSRange)
+}
+
 class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
     struct LinkDetectionType : RawOptionSetType, BooleanType {
@@ -33,37 +37,55 @@ class ContextLabel: UILabel, NSLayoutManagerDelegate {
         var linkString: String
     }
     
+    // Delegate
+    var delegate: ContextLabelDelegate?
+    
     // TextColors
+    lazy var userHandleTextColor: UIColor = {
+        let _userHandleTextColor = UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
+        return _userHandleTextColor
+        }()
+
+    lazy var hashtagTextColor: UIColor = {
+        let _hashtagTextColor = UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
+        return _hashtagTextColor
+        }()
+
     lazy var linkTextColor: UIColor = {
-        let _linkTextColor = UIColor.blueColor() // self.textColor
+        let _linkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
         return _linkTextColor
         }()
     
-    lazy var linkHighlightedTextColor: UIColor = {
-        let _linkHighlightedTextColor = self.highlightedTextColor
-        return _linkHighlightedTextColor
-        }()
+    var userHandleHighlightedTextColor: UIColor?
+    var hashtagHighlightedTextColor: UIColor?
+    var linkHighlightedTextColor: UIColor?
     
-    lazy var userHandleTextColor: UIColor = {
-        let _userHandleTextColor = UIColor.purpleColor() // self.textColor
-        return _userHandleTextColor
-        }()
-    
-    lazy var userHandleHighlightedTextColor: UIColor = {
-        let _userHandleHighlightedTextColor = self.highlightedTextColor
-        return _userHandleHighlightedTextColor
-        }()
-    
-    lazy var hashtagTextColor: UIColor = {
-        let _hashtagTextColor = UIColor.lightGrayColor() // self.textColor
-        return _hashtagTextColor
-        }()
-    
-    lazy var hashtagHighlightedTextColor: UIColor = {
-        let _hashtagHighlightedTextColor = self.highlightedTextColor
-        return _hashtagHighlightedTextColor
-        }()
-    
+    private var privateUserHandleHighlightedTextColor: UIColor {
+        get {
+            if let userHandleHighlightedTextColor = userHandleHighlightedTextColor {
+                return userHandleHighlightedTextColor
+            } else {
+                return highlightedTextColorForTextColor(userHandleTextColor)
+            }
+        }
+    }
+
+    private var privateHashtagHighlightedTextColor: UIColor {
+        if let hashtagHighlightedTextColor = hashtagHighlightedTextColor {
+            return hashtagHighlightedTextColor
+        } else {
+            return highlightedTextColorForTextColor(hashtagTextColor)
+        }
+    }
+
+    private var privateLinkHighlightedTextColor: UIColor {
+        if let linkHighlightedTextColor = linkHighlightedTextColor {
+            return linkHighlightedTextColor
+        } else {
+            return highlightedTextColorForTextColor(linkTextColor)
+        }
+    }
+
     // Automatic detection of links, hashtags and usernames. When this is enabled links
     // are coloured using the textColor property above
     var automaticLinkDetectionEnabled: Bool = true {
@@ -81,22 +103,6 @@ class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
     // Selected linkRangeResult
     var selectedLinkRangeResult: LinkRangeResult?
-    
-    // Selected range
-    var selectedRange: NSRange? {
-        didSet {
-            NSLog("DID SELECT RANGE: \(selectedRange)")
-            
-            if let selectedLinkRangeResult = selectedLinkRangeResult {
-//                touchHandler(selectedLinkRangeResult)
-            }
-        }
-    }
-    
-//    // TouchHandler
-//    var touchHandler = { (linkRangeResult: LinkRangeResult) -> Void in
-//        
-//    }
     
     // Dictionary of detected links and their ranges in the text
     var linkRangeResults: [LinkRangeResult]?
@@ -159,6 +165,14 @@ class ContextLabel: UILabel, NSLayoutManagerDelegate {
         self.init(frame:CGRectZero)
     }
     
+    convenience init(with userHandleTextColor: UIColor, hashtagTextColor: UIColor, linkTextColor: UIColor) {
+        self.init(frame:CGRectZero)
+        
+        self.userHandleTextColor = userHandleTextColor
+        self.hashtagTextColor = hashtagTextColor
+        self.linkTextColor = linkTextColor
+    }
+    
     // MARK : Override Functions
     
     override var text: String! {
@@ -208,13 +222,12 @@ class ContextLabel: UILabel, NSLayoutManagerDelegate {
         
         addLinkAttributesToLinkRangeResultWithTouches(touches, highlighted: false)
         
-        if let linkRangeResult = getLinkRangeResultWithTouches(touches) {
-            selectedRange = linkRangeResult.linkRange
-            selectedLinkRangeResult = linkRangeResult
-        } else {
-            selectedRange = nil
-            selectedLinkRangeResult = nil
+        // Call delegate
+        if let selectedLinkRangeResult = selectedLinkRangeResult {
+            delegate?.contextLabel(self, didSelectText: selectedLinkRangeResult.linkString, inRange: selectedLinkRangeResult.linkRange)
         }
+        
+        selectedLinkRangeResult = nil
 
         super.touchesEnded(touches, withEvent: event)
     }
@@ -404,17 +417,17 @@ class ContextLabel: UILabel, NSLayoutManagerDelegate {
             var attributes: [NSObject: AnyObject]?
             
             if linkRangeResult.linkDetectionType & .UserHandle {
-                let color = highlighted ? userHandleHighlightedTextColor : userHandleTextColor
+                let color = highlighted ? privateUserHandleHighlightedTextColor : userHandleTextColor
                 attributes = attributesWithTextColor(color)
             }
             
             if linkRangeResult.linkDetectionType & .Hashtag {
-                let color = highlighted ? hashtagHighlightedTextColor : hashtagTextColor
+                let color = highlighted ? privateHashtagHighlightedTextColor : hashtagTextColor
                 attributes = attributesWithTextColor(color)
             }
             
             if linkRangeResult.linkDetectionType & .URL {
-                let color = highlighted ? linkHighlightedTextColor : linkTextColor
+                let color = highlighted ? privateLinkHighlightedTextColor : linkTextColor
                 attributes = attributesWithTextColor(color)
             }
             
@@ -459,5 +472,9 @@ class ContextLabel: UILabel, NSLayoutManagerDelegate {
         }
         
         return nil
+    }
+    
+    func highlightedTextColorForTextColor(textColor: UIColor) -> UIColor {
+        return textColor.colorWithAlphaComponent(0.5)
     }
 }
