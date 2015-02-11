@@ -25,9 +25,9 @@ view.addSubview(contextLabel)
 ```
 
 ### Use of cache
-When setting the text, ContextLabel generates an instance of ‘’’ContextLabelData’’’ which is a NSObject subclass that can be persisted in order to enable reuse for unchanged data.
+When setting the text, ContextLabel generates an instance of ```ContextLabelData``` which is a NSObject subclass that can be persisted in order to enable reuse for unchanged data.
 
-‘’’ContextLabelData’’’ holds the actual ```attributedString```, the ```linkRangeResults``` and a userInfo dictionary which can be used to compare against the model data to see if it’s still valid.
+```ContextLabelData``` holds the actual ```attributedString```, the ```linkRangeResults``` and a ```userInfo``` dictionary which can be used to compare against the model data to see if it’s still valid.
 
 ``` swift
 if let cachedContextLabelData: ContextLabelData = … {
