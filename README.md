@@ -6,7 +6,7 @@ A simple to use drop in replacement for UILabel written in Swift that provides a
 ContextLabel doesn't have any special dependencies so just include the files ContextLabel.swift from ContextLabel/Source in your project. Then use the ContextLabel class in replacement for UILabel.
 
 ## Text colors
-ContextLabel support different colors for URLs, twitter style usernames and hashtags. By default the link text colors are set to userHandle RGB(71,90,109), hashtag RGB(151, 154, 158) and url RGB(45, 113, 178). If there is no UIColor set on the highlighted  textColor properties, an alpha of 0.5 is applied to the set text color when a link is detected.
+ContextLabel supports different colors for URLs, twitter style usernames and hashtags. By default the link text colors are set to userHandle RGB(71,90,109), hashtag RGB(151, 154, 158) and url RGB(45, 113, 178). If there is no UIColor set on the highlighted  textColor properties, an alpha of 0.5 is applied to the set text color when a link is detected.
 
 To set your own text colors you can use the convenience initializer ```init(with userHandleTextColor: UIColor, hashtagTextColor: UIColor, linkTextColor: UIColor)```
 
@@ -23,7 +23,7 @@ view.addSubview(contextLabel)
 ```
 
 ## Demo
-The Repository includes a Xcode project that shows a simple use of the label in a storyboard with examples for implementing tappable links.
+The Repository includes a Xcode project that shows a simple use of the label in a ViewController with selectable @UserHandle, #Hashtag and link.
 
 ## License & Credits
 ContextLabel is available under the MIT license.
@@ -31,5 +31,6 @@ ContextLabel is available under the MIT license.
 KILabel was inspired by KILabel (https://github.com/Krelborn/KILabel).
 
 ## Contact
+- http://michaelloistl.com
 - http://twitter.com/michaelloistl
 - http://github.com/michaelloistl
