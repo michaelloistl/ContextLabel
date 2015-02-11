@@ -57,15 +57,15 @@ class ViewController: UIViewController, ContextLabelDelegate {
     
     // MRAK: ContextLabelDelegate
 
-    func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: ContextLabel.LinkRangeResult) {
+    func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult) {
         resultLabel.text = "beganTouchOf: \(text)" + "\nRange: \(linkRangeResult.linkRange)"
     }
     
-    func contextLabel(contextLabel: ContextLabel, movedTouchTo text: String, with linkRangeResult: ContextLabel.LinkRangeResult) {
+    func contextLabel(contextLabel: ContextLabel, movedTouchTo text: String, with linkRangeResult: LinkRangeResult) {
         resultLabel.text = "movedTouchTo: \(text)" + "\nRange: \(linkRangeResult.linkRange)"
     }
     
-    func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: ContextLabel.LinkRangeResult) {
+    func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: LinkRangeResult) {
         resultLabel.text = "endedTouchOf: \(text)" + "\nRange: \(linkRangeResult.linkRange)"
     }
 }
