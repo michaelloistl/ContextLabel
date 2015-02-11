@@ -14,12 +14,32 @@ To set your own text colors you can use the convenience initializer ```init(with
 In order to get the selected string as well as Range you need to adopt the ContextLabelDelegate protocol and implement the ```func contextLabel(contextLabel: ContextLabel, didSelectText: String, inRange: NSRange)```
 
 ## Sample code
+
+### Replacement for UILabel
 ``` swift
 let contextLabel = ContextLabel(frame: CGRectMake(0, 0, 320, 100))
 contextLabel.text = "ContextLabel is a Swift drop-in replacement for UILabel that supports selectable @UserHandle, #Hashtags and links https://github.com/michaelloistl/ContextLabel"
 contextLabel.delegate = self
 
 view.addSubview(contextLabel)
+```
+
+### Use of cache
+When setting the text, ContextLabel generates an instance of ‘’’ContextLabelData’’’ which is a NSObject subclass that can be persisted in order to enable reuse for unchanged data.
+
+‘’’ContextLabelData’’’ holds the actual ```attributedString```, the ```linkRangeResults``` and a userInfo dictionary which can be used to compare against the model data to see if it’s still valid.
+
+``` swift
+if let cachedContextLabelData: ContextLabelData = … {
+	// Set cached contextLabelData
+	contextLabel.contextLabelData = cachedTextContextLabelData
+} else {
+	// Set label text
+	contextLabel.text = text
+
+	// Cache contextLabelData that has been generated from contextLabel
+	cacheContextLabelData(contextLabel.contextLabelData)
+}          
 ```
 
 ## Demo
