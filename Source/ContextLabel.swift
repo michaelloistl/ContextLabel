@@ -266,7 +266,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         setupTextSystem()
     }
 
-    public override convenience init() {
+    public convenience init() {
         self.init(frame:CGRectZero)
     }
     
@@ -286,7 +286,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         textContainer.size = CGSizeMake(CGRectGetWidth(self.bounds), CGFloat.max)
     }
     
-    public override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+    override public func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         
         if let linkRangeResult = getLinkRangeResultWithTouches(touches) {
 
@@ -306,7 +306,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         super.touchesBegan(touches, withEvent: event)
     }
 
-    public override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
+    override public func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
 
         if let linkRangeResult = getLinkRangeResultWithTouches(touches) {
             
@@ -336,7 +336,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         super.touchesMoved(touches, withEvent: event)
     }
     
-    public override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
+    override public func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
         
         addLinkAttributesToLinkRangeResultWithTouches(touches, highlighted: false)
         
@@ -351,7 +351,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         super.touchesEnded(touches, withEvent: event)
     }
     
-    public override func touchesCancelled(touches: NSSet, withEvent event: UIEvent!) {
+    override public func touchesCancelled(touches: Set<NSObject>, withEvent event: UIEvent) {
         addLinkAttributesToLinkRangeResultWithTouches(touches, highlighted: false)
         super.touchesCancelled(touches, withEvent: event)
     }
@@ -508,7 +508,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         let regex = NSRegularExpression(pattern: regexPattern, options: .CaseInsensitive, error: &error)
 
         // Run the expression and get matches
-        let length: Int = countElements(text)
+        let length: Int = count(text)
         if let matches = regex?.matchesInString(text, options: .ReportCompletion, range: NSMakeRange(0, length)) {
 
             // Add all our ranges to the result
@@ -533,7 +533,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         let plainText = attributedString.string
         var error: NSError?
         if let dataDetector = NSDataDetector(types: NSTextCheckingType.Link.rawValue, error: &error) {
-            let matches = dataDetector.matchesInString(plainText, options: NSMatchingOptions.ReportCompletion, range: NSMakeRange(0, countElements(plainText)))
+            let matches = dataDetector.matchesInString(plainText, options: NSMatchingOptions.ReportCompletion, range: NSMakeRange(0, count(plainText)))
 
             // Add a range entry for every url we found
             for match in matches {
@@ -604,7 +604,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     private func getLinkRangeResultWithTouches(touches: NSSet!) -> LinkRangeResult? {
-        let anyTouch: UITouch = touches.anyObject() as UITouch
+        let anyTouch: UITouch = touches.anyObject() as! UITouch
         let touchLocation = anyTouch.locationInView(self)
         if let touchedLink = getLinkRangeResultAtLocation(touchLocation) {
             return touchedLink
