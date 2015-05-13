@@ -16,10 +16,9 @@ protocol ContextLabelDelegate {
 }
 
 public class ContextLabelData: NSObject {
-    let attributedString: NSAttributedString
-    let linkRangeResults: [LinkRangeResult]
-    var userInfo: [NSObject: AnyObject]?
-    
+    var attributedString: NSAttributedString
+    var linkRangeResults: Array<LinkRangeResult>
+    var userInfo: Dictionary<NSObject, AnyObject>?
     
     // MARK: Initializers
     
@@ -36,7 +35,6 @@ public class LinkRangeResult: NSObject {
     var linkString: String
     var textLink: ContextLabel.TextLink?
     
-    
     // MARK: Initializers
     
     init(linkDetectionType: ContextLabel.LinkDetectionType, linkRange: Range<String.Index>, linkString: String, textLink: ContextLabel.TextLink?) {
@@ -50,7 +48,7 @@ public class LinkRangeResult: NSObject {
 }
 
 public class ContextLabel: UILabel, NSLayoutManagerDelegate {
-
+    
     struct LinkDetectionType : RawOptionSetType {
         typealias RawValue = UInt
         private var value: UInt = 0
@@ -167,17 +165,20 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     // Array of link texts
     var textLinks: [TextLink]? {
         didSet {
-            if let attributedText = attributedText {
-
-                // TODO: Text Links
-                
-//                // Get link ranges
-//                linkRangeResults = getRangesForLinksInAttributedString(attributedText)
-//                
-//                // Addd attributes to link ranges
-//                if let linkRangeResults = linkRangeResults {
-//                    addLinkAttributesToAttributedStringWithLinkRangeResults(linkRangeResults)
-//                }
+            if let textLinks = textLinks {
+                if let contextLabelData = contextLabelData {
+                    
+                    // Add linkRangeResults for textLinks
+                    let textLinkRangeResults = getRangesForTextLinks(textLinks)
+                    contextLabelData.linkRangeResults += textLinkRangeResults
+                    
+                    // Addd attributes for textLinkRangeResults
+                    let attributedString = addLinkAttributesToAttributedString(contextLabelData.attributedString, withLinkRangeResults: textLinkRangeResults)
+                    contextLabelData.attributedString = attributedString
+                    
+                    // Set attributedText
+                    attributedText = contextLabelData.attributedString
+                }
             }
         }
     }
@@ -266,9 +267,9 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         setupTextSystem()
     }
 
-    public override convenience init() {
-        self.init(frame:CGRectZero)
-    }
+//    public override convenience init() {
+//        self.init(frame:CGRectZero)
+//    }
     
     public convenience init(with userHandleTextColor: UIColor, hashtagTextColor: UIColor, linkTextColor: UIColor) {
         self.init(frame:CGRectZero)
@@ -283,10 +284,11 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
     public override func layoutSubviews() {
         super.layoutSubviews()
+        
         textContainer.size = CGSizeMake(CGRectGetWidth(self.bounds), CGFloat.max)
     }
     
-    public override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+    public override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         
         if let linkRangeResult = getLinkRangeResultWithTouches(touches) {
 
@@ -306,7 +308,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         super.touchesBegan(touches, withEvent: event)
     }
 
-    public override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
+    public override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
 
         if let linkRangeResult = getLinkRangeResultWithTouches(touches) {
             
@@ -336,7 +338,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         super.touchesMoved(touches, withEvent: event)
     }
     
-    public override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
+    public override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
         
         addLinkAttributesToLinkRangeResultWithTouches(touches, highlighted: false)
         
@@ -351,13 +353,22 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         super.touchesEnded(touches, withEvent: event)
     }
     
-    public override func touchesCancelled(touches: NSSet, withEvent event: UIEvent!) {
+    public override func touchesCancelled(touches: Set<NSObject>, withEvent event: UIEvent!) {
         addLinkAttributesToLinkRangeResultWithTouches(touches, highlighted: false)
         super.touchesCancelled(touches, withEvent: event)
     }
     
-    
     // MARK: Functions
+    
+    func addAttributes(attributes: Dictionary<NSObject, AnyObject>, range: NSRange) {
+        if let contextLabelData = contextLabelData {
+            var mutableAttributedString = NSMutableAttributedString(attributedString: contextLabelData.attributedString)
+            mutableAttributedString.addAttributes(attributes, range: range)
+            
+            contextLabelData.attributedString = mutableAttributedString
+            attributedText = contextLabelData.attributedString
+        }
+    }
     
     public func setContextLabelDataWithText(text: String?) {
         var text = text
@@ -455,8 +466,10 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     private func getRangesForLinksInAttributedString(attributedString: NSAttributedString) -> [LinkRangeResult] {
         var rangesForLinks = [LinkRangeResult]()
 
-        if textLinks?.count > 0 {
-            rangesForLinks += getRangesForTextLinks(attributedString.string)
+        if let textLinks = textLinks {
+            if textLinks.count > 0 {
+                rangesForLinks += getRangesForTextLinks(textLinks)
+            }
         }
         
         if linkDetectionTypes & .UserHandle != nil {
@@ -474,16 +487,14 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         return rangesForLinks
     }
 
-    private func getRangesForTextLinks(text: String) -> [LinkRangeResult] {
+    private func getRangesForTextLinks(textLinks: [TextLink]) -> [LinkRangeResult] {
         var rangesForLinkType = [LinkRangeResult]()
         
-        if let textLinks = textLinks {
-            for textLink in textLinks {
-                let linkType = LinkDetectionType.TextLink
-                let matchString = textLink.text
-                if let stringIndexRange = text.rangeOfString(textLink.text, options: .CaseInsensitiveSearch) {
-                    rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange, linkString: matchString, textLink: textLink))
-                }
+        for textLink in textLinks {
+            let linkType = LinkDetectionType.TextLink
+            let matchString = textLink.text
+            if let stringIndexRange = text.rangeOfString(textLink.text, options: .CaseInsensitiveSearch) {
+                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange, linkString: matchString, textLink: textLink))
             }
         }
         
@@ -508,7 +519,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         let regex = NSRegularExpression(pattern: regexPattern, options: .CaseInsensitive, error: &error)
 
         // Run the expression and get matches
-        let length: Int = countElements(text)
+        let length: Int = count(text)
         if let matches = regex?.matchesInString(text, options: .ReportCompletion, range: NSMakeRange(0, length)) {
 
             // Add all our ranges to the result
@@ -533,7 +544,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         let plainText = attributedString.string
         var error: NSError?
         if let dataDetector = NSDataDetector(types: NSTextCheckingType.Link.rawValue, error: &error) {
-            let matches = dataDetector.matchesInString(plainText, options: NSMatchingOptions.ReportCompletion, range: NSMakeRange(0, countElements(plainText)))
+            let matches = dataDetector.matchesInString(plainText, options: NSMatchingOptions.ReportCompletion, range: NSMakeRange(0, count(plainText)))
 
             // Add a range entry for every url we found
             for match in matches {
@@ -604,7 +615,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     private func getLinkRangeResultWithTouches(touches: NSSet!) -> LinkRangeResult? {
-        let anyTouch: UITouch = touches.anyObject() as UITouch
+        let anyTouch: UITouch = touches.anyObject() as! UITouch
         let touchLocation = anyTouch.locationInView(self)
         if let touchedLink = getLinkRangeResultAtLocation(touchLocation) {
             return touchedLink
