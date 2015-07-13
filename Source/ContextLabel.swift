@@ -259,17 +259,15 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
     public required init(coder: NSCoder) {
         super.init(coder: coder)
+        
         setupTextSystem()
     }
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
+        
         setupTextSystem()
     }
-
-//    public override convenience init() {
-//        self.init(frame:CGRectZero)
-//    }
     
     public convenience init(with userHandleTextColor: UIColor, hashtagTextColor: UIColor, linkTextColor: UIColor) {
         self.init(frame:CGRectZero)
@@ -451,7 +449,8 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     private func setupTextSystem() {
-
+        lineBreakMode = .ByTruncatingTail
+        
         // Attach the layou manager to the container and storage
         self.textContainer.layoutManager = self.layoutManager
 
