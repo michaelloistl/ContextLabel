@@ -527,12 +527,12 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     private func getRangesForUserHandlesInText(text: String) -> [LinkRangeResult] {
-        let rangesForUserHandles = getRangesForLinkType(LinkDetectionType.UserHandle, regexPattern: "(?<!\\w)@([\\w\\_]+)?", text: text)
+        let rangesForUserHandles = getRangesForLinkType(LinkDetectionType.UserHandle, regexPattern: "(?<!\\w)@([\\w\\_.]+)?", text: text)
         return rangesForUserHandles
     }
 
     private func getRangesForHashtagsInText(text: String) -> [LinkRangeResult] {
-        let rangesForHashtags = getRangesForLinkType(LinkDetectionType.Hashtag, regexPattern: "\\B#\\w*[a-zA-Z_0-9]+\\w*", text: text) //"(?<!\\w)#([\\w\\_]+)?"
+        let rangesForHashtags = getRangesForLinkType(LinkDetectionType.Hashtag, regexPattern: "(?<!\\w)#([\\w\\_]+)?", text: text)
         return rangesForHashtags
     }
 
