@@ -5,9 +5,31 @@
 //  Created by Michael Loistl on 25/08/2014.
 //  Copyright (c) 2014 Michael Loistl. All rights reserved.
 //
+//
+// Fixed by DeMoN, using info from: http://stackoverflow.com/questions/27880650/swift-extract-regex-matches
+//
 
 import Foundation
 import UIKit
+
+extension String {
+    func rangeFromNSRange(nsRange : NSRange) -> Range<String.Index>? {
+        let from16 = advance(utf16.startIndex, nsRange.location, utf16.endIndex)
+        let to16 = advance(from16, nsRange.length, utf16.endIndex)
+        if let from = String.Index(from16, within: self),
+            let to = String.Index(to16, within: self) {
+                return from ..< to
+        }
+        return nil
+    }
+    
+    func NSRangeFromRange(range : Range<String.Index>) -> NSRange {
+        let utf16view = self.utf16
+        let from = String.UTF16View.Index(range.startIndex, within: utf16view)
+        let to = String.UTF16View.Index(range.endIndex, within: utf16view)
+        return NSMakeRange(from - utf16view.startIndex, to - from)
+    }
+}
 
 protocol ContextLabelDelegate {
     func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult)
@@ -32,14 +54,16 @@ public class ContextLabelData: NSObject {
 public class LinkRangeResult: NSObject {
     var linkDetectionType: ContextLabel.LinkDetectionType
     var linkRange: Range<String.Index>
+    var linkNSRange: NSRange
     var linkString: String
     var textLink: ContextLabel.TextLink?
     
     // MARK: Initializers
     
-    init(linkDetectionType: ContextLabel.LinkDetectionType, linkRange: Range<String.Index>, linkString: String, textLink: ContextLabel.TextLink?) {
+    init(linkDetectionType: ContextLabel.LinkDetectionType, linkRange: Range<String.Index>, linkNSRange: NSRange, linkString: String, textLink: ContextLabel.TextLink?) {
         self.linkDetectionType = linkDetectionType
         self.linkRange = linkRange
+        self.linkNSRange = linkNSRange
         self.linkString = linkString
         self.textLink = textLink
         
@@ -494,7 +518,8 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             let linkType = LinkDetectionType.TextLink
             let matchString = textLink.text
             if let stringIndexRange = text.rangeOfString(textLink.text, options: .CaseInsensitiveSearch) {
-                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange, linkString: matchString, textLink: textLink))
+                let nsRange = textLink.text.NSRangeFromRange(stringIndexRange)
+                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange, linkNSRange: nsRange, linkString: matchString, textLink: textLink))
             }
         }
         
@@ -502,7 +527,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     private func getRangesForUserHandlesInText(text: String) -> [LinkRangeResult] {
-        let rangesForUserHandles = getRangesForLinkType(LinkDetectionType.UserHandle, regexPattern: "(?<!\\w)@([\\w\\_]+)?", text: text)
+        let rangesForUserHandles = getRangesForLinkType(LinkDetectionType.UserHandle, regexPattern: "(?<!\\w)@([\\w\\_.]+)?", text: text)
         return rangesForUserHandles
     }
 
@@ -519,17 +544,16 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         let regex = NSRegularExpression(pattern: regexPattern, options: .CaseInsensitive, error: &error)
 
         // Run the expression and get matches
-        let length: Int = count(text)
-        if let matches = regex?.matchesInString(text, options: .ReportCompletion, range: NSMakeRange(0, length)) {
+        if let matches = regex?.matchesInString(text, options: .ReportCompletion, range: NSMakeRange(0, count(text.utf16))) {
 
             // Add all our ranges to the result
             for match in matches {
                 if let textCheckingResult = match as? NSTextCheckingResult {
                     let matchRange = textCheckingResult.range
-                    let stringIndexRange = advance(text.startIndex, matchRange.location)..<advance(text.startIndex, matchRange.location + matchRange.length)
-                    let matchString = text.substringWithRange(stringIndexRange)
+                    let stringIndexRange = text.rangeFromNSRange(matchRange)
+                    let matchString = text.substringWithRange(stringIndexRange!)
                     
-                    rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange, linkString: matchString, textLink: nil))
+                    rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange!, linkNSRange: matchRange, linkString: matchString, textLink: nil))
                 }
             }
         }
@@ -550,17 +574,16 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             for match in matches {
                 if let textCheckingResult = match as? NSTextCheckingResult {
                     let matchRange = textCheckingResult.range
-                    let stringIndexRange = advance(text.startIndex, matchRange.location)..<advance(text.startIndex, matchRange.location + matchRange.length)
-
+                    let stringIndexRange = text.rangeFromNSRange(matchRange)
                     // If there's a link embedded in the attributes, use that instead of the raw text
                     var realURL: AnyObject? = attributedString.attribute(NSLinkAttributeName, atIndex: matchRange.location, effectiveRange: nil)
                     if realURL == nil {
-                        realURL = plainText.substringWithRange(advance(text.startIndex, matchRange.location)..<advance(text.startIndex, matchRange.location + matchRange.length))
+                        realURL = plainText.substringWithRange(stringIndexRange!)
                     }
 
                     if textCheckingResult.resultType == .Link {
                         if let matchString = realURL as? String {
-                            rangesForURLs.append(LinkRangeResult(linkDetectionType: LinkDetectionType.URL, linkRange: stringIndexRange, linkString: matchString, textLink: nil))
+                            rangesForURLs.append(LinkRangeResult(linkDetectionType: LinkDetectionType.URL, linkRange: stringIndexRange!, linkNSRange: matchRange, linkString: matchString, textLink: nil))
                         }
                     }
                 }
@@ -597,11 +620,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             }
             
             if attributes != nil {
-                let location = distance(text.startIndex, linkRangeResult.linkRange.startIndex)
-                let length = distance(linkRangeResult.linkRange.startIndex, linkRangeResult.linkRange.endIndex)
-                let range = NSMakeRange(location, length)
-                
-                mutableAttributedString.setAttributes(attributes!, range: range)
+                mutableAttributedString.setAttributes(attributes!, range: linkRangeResult.linkNSRange)
             }
         }
         
@@ -631,13 +650,11 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         if characterIndex <= textStorage?.length {
             if let linkRangeResults = contextLabelData?.linkRangeResults {
                 for linkRangeResult in linkRangeResults {
-                    let rangeLocation = distance(text.startIndex, linkRangeResult.linkRange.startIndex)
-                    let rangeLength = distance(linkRangeResult.linkRange.startIndex, linkRangeResult.linkRange.endIndex)
-                    
-                    if rangeLocation <= characterIndex &&
-                        (rangeLocation + rangeLength - 1) >= characterIndex {
+                    let linkRange = linkRangeResult.linkNSRange
+                    if linkRange.location <= characterIndex &&
+                        (linkRange.location + linkRange.length - 1) >= characterIndex {
                             
-                            let glyphRange = layoutManager.glyphRangeForCharacterRange(NSMakeRange(rangeLocation, rangeLength), actualCharacterRange: nil)
+                            let glyphRange = layoutManager.glyphRangeForCharacterRange(linkRange, actualCharacterRange: nil)
                             let boundingRect = layoutManager.boundingRectForGlyphRange(glyphRange, inTextContainer: textContainer)
                             
                             if CGRectContainsPoint(boundingRect, location) {
