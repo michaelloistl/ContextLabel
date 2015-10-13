@@ -75,38 +75,23 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     var delegate: ContextLabelDelegate?
     
     
-    // MARK: Config Properties
+    // MARK: - Config Properties
     
     // LineSpacing
     var lineSpacing: CGFloat?
     
     // TextColors
-    lazy var textLinkTextColor: UIColor = {
-        let _textLinkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
-        return _textLinkTextColor
-        }()
-    
-    lazy var userHandleTextColor: UIColor = {
-        let _userHandleTextColor = UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
-        return _userHandleTextColor
-        }()
-
-    lazy var hashtagTextColor: UIColor = {
-        let _hashtagTextColor = UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
-        return _hashtagTextColor
-        }()
-
-    lazy var linkTextColor: UIColor = {
-        let _linkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
-        return _linkTextColor
-        }()
+    var textLinkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+    var userHandleTextColor = UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
+    var hashtagTextColor = UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
+    var linkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
     
     var textLinkHighlightedTextColor: UIColor?
     var userHandleHighlightedTextColor: UIColor?
     var hashtagHighlightedTextColor: UIColor?
     var linkHighlightedTextColor: UIColor?
     
-    // MARK: Private Properties
+    // MARK: - Private Properties
     
     private var privateTextLinkHighlightedTextColor: UIColor {
         get {
@@ -144,8 +129,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         }
     }
 
-    
-    // MARK: Properties
+    // MARK: - Properties
     
     // Automatic detection of links, hashtags and usernames. When this is enabled links
     // are coloured using the textColor property above
@@ -228,7 +212,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         }()
     
     
-    // MARK: Properties override
+    // MARK: - Properties override
 
     public override var frame: CGRect {
         didSet {
@@ -255,7 +239,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     
-    // MARK : Initializations
+    // MARK: - Initializations
     
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -278,7 +262,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     
-    // MARK : Override Functions
+    // MARK: - Override Methods
     
     public override func layoutSubviews() {
         super.layoutSubviews()
@@ -354,7 +338,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         super.touchesCancelled(touches, withEvent: event)
     }
     
-    // MARK: Functions
+    // MARK: - Methods
     
     func addAttributes(attributes: Dictionary<String, AnyObject>, range: NSRange) {
         if let contextLabelData = contextLabelData {
@@ -398,7 +382,6 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         self.contextLabelData = contextLabelDataWithText(text)
     }
     
-    // TEST testAttributesFromProperties()
     public func attributesFromProperties() -> [String : AnyObject] {
         
         // Shadow attributes

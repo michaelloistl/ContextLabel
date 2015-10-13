@@ -10,6 +10,7 @@
 		6A17E9651BCD6D0F006296BE /* ContextLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A17E9641BCD6D0F006296BE /* ContextLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6A17E96C1BCD6D0F006296BE /* ContextLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A17E9611BCD6D0F006296BE /* ContextLabel.framework */; settings = {ASSET_TAGS = (); }; };
 		6A17E9711BCD6D0F006296BE /* ContextLabelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A17E9701BCD6D0F006296BE /* ContextLabelTests.swift */; };
+		6AE5CE471BCD757E00B517B1 /* ContextLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE5CE461BCD757E00B517B1 /* ContextLabel.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +30,7 @@
 		6A17E96B1BCD6D0F006296BE /* ContextLabelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ContextLabelTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A17E9701BCD6D0F006296BE /* ContextLabelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextLabelTests.swift; sourceTree = "<group>"; };
 		6A17E9721BCD6D0F006296BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6AE5CE461BCD757E00B517B1 /* ContextLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextLabel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,8 +73,8 @@
 		6A17E9631BCD6D0F006296BE /* ContextLabel */ = {
 			isa = PBXGroup;
 			children = (
-				6A17E9641BCD6D0F006296BE /* ContextLabel.h */,
-				6A17E9661BCD6D0F006296BE /* Info.plist */,
+				6AE5CE461BCD757E00B517B1 /* ContextLabel.swift */,
+				6AE5CE481BCD758300B517B1 /* Support Files */,
 			);
 			path = ContextLabel;
 			sourceTree = "<group>";
@@ -84,6 +86,15 @@
 				6A17E9721BCD6D0F006296BE /* Info.plist */,
 			);
 			path = ContextLabelTests;
+			sourceTree = "<group>";
+		};
+		6AE5CE481BCD758300B517B1 /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				6A17E9641BCD6D0F006296BE /* ContextLabel.h */,
+				6A17E9661BCD6D0F006296BE /* Info.plist */,
+			);
+			name = "Support Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -142,6 +153,7 @@
 		6A17E9581BCD6D0F006296BE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = Aplo;
 				TargetAttributes = {
@@ -193,6 +205,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6AE5CE471BCD757E00B517B1 /* ContextLabel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -307,6 +320,7 @@
 		6A17E9761BCD6D0F006296BE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -317,12 +331,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.aplo.ContextLabel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		6A17E9771BCD6D0F006296BE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -375,6 +391,7 @@
 				6A17E9771BCD6D0F006296BE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		6A17E9781BCD6D0F006296BE /* Build configuration list for PBXNativeTarget "ContextLabelTests" */ = {
 			isa = XCConfigurationList;
@@ -383,6 +400,7 @@
 				6A17E97A1BCD6D0F006296BE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
