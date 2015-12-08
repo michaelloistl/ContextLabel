@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-protocol ContextLabelDelegate {
+public protocol ContextLabelDelegate {
     func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult)
     func contextLabel(contextLabel: ContextLabel, movedTouchTo text: String, with linkRangeResult: LinkRangeResult)
     func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: LinkRangeResult)
@@ -72,24 +72,24 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     // Delegate
-    var delegate: ContextLabelDelegate?
+    public var delegate: ContextLabelDelegate?
     
     
     // MARK: - Config Properties
     
     // LineSpacing
-    var lineSpacing: CGFloat?
+    public var lineSpacing: CGFloat?
     
     // TextColors
-    var textLinkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
-    var userHandleTextColor = UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
-    var hashtagTextColor = UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
-    var linkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+    public var textLinkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+    public var userHandleTextColor = UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
+    public var hashtagTextColor = UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
+    public var linkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
     
-    var textLinkHighlightedTextColor: UIColor?
-    var userHandleHighlightedTextColor: UIColor?
-    var hashtagHighlightedTextColor: UIColor?
-    var linkHighlightedTextColor: UIColor?
+    public var textLinkHighlightedTextColor: UIColor?
+    public var userHandleHighlightedTextColor: UIColor?
+    public var hashtagHighlightedTextColor: UIColor?
+    public var linkHighlightedTextColor: UIColor?
     
     // MARK: - Private Properties
     
