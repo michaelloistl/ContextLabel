@@ -91,6 +91,12 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     public var hashtagHighlightedTextColor: UIColor?
     public var linkHighlightedTextColor: UIColor?
     
+    // UnderlineStyle
+    public var textLinkUnderlineStyle: NSUnderlineStyle = .StyleNone
+    public var userHandleUnderlineStyle: NSUnderlineStyle = .StyleNone
+    public var hashtagUnderlineStyle: NSUnderlineStyle = .StyleNone
+    public var linkUnderlineStyle: NSUnderlineStyle = .StyleNone
+    
     // MARK: - Private Properties
     
     private var privateTextLinkHighlightedTextColor: UIColor {
@@ -429,6 +435,13 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         return attributes
     }
     
+    private func attributesWithTextColor(textColor: UIColor, underlineStyle: NSUnderlineStyle) -> [String: AnyObject] {
+        var attributes = attributesWithTextColor(textColor)
+        attributes[NSUnderlineStyleAttributeName] = underlineStyle.rawValue
+        
+        return attributes
+    }
+    
     private func setupTextSystem() {
         lineBreakMode = .ByTruncatingTail
         
@@ -566,22 +579,25 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             
             if linkRangeResult.linkDetectionType == .TextLink {
                 let color = highlighted ? privateTextLinkHighlightedTextColor : textLinkTextColor
-                attributes = attributesWithTextColor(color)
+                attributes = attributesWithTextColor(color, underlineStyle: textLinkUnderlineStyle)
             }
             
             if linkRangeResult.linkDetectionType == .UserHandle {
                 let color = highlighted ? privateUserHandleHighlightedTextColor : userHandleTextColor
-                attributes = attributesWithTextColor(color)
+                attributes = attributesWithTextColor(color, underlineStyle: userHandleUnderlineStyle)
+                
             }
             
             if linkRangeResult.linkDetectionType == .Hashtag {
                 let color = highlighted ? privateHashtagHighlightedTextColor : hashtagTextColor
-                attributes = attributesWithTextColor(color)
+                attributes = attributesWithTextColor(color, underlineStyle: hashtagUnderlineStyle)
+                
             }
             
             if linkRangeResult.linkDetectionType == .URL {
                 let color = highlighted ? privateLinkHighlightedTextColor : linkTextColor
-                attributes = attributesWithTextColor(color)
+                attributes = attributesWithTextColor(color, underlineStyle: linkUnderlineStyle)
+                
             }
             
             if let attributes = attributes {
