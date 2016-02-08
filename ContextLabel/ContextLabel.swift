@@ -79,6 +79,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
     // LineSpacing
     public var lineSpacing: CGFloat?
+    public var lineHeightMultiple: CGFloat?
     
     // TextColors
     public var textLinkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
@@ -411,6 +412,11 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         // LineSpacing
         if let lineSpacing = lineSpacing {
             mutableParagraphStyle.lineSpacing = lineSpacing
+        }
+        
+        // LineHeightMultiple
+        if let lineHeightMultiple = lineHeightMultiple {
+            mutableParagraphStyle.lineHeightMultiple = lineHeightMultiple
         }
         
         // Attributes dictionary
