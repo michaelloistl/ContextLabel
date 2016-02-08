@@ -30,14 +30,14 @@ public class ContextLabelData: NSObject {
 }
 
 public class LinkRangeResult: NSObject {
-    var linkDetectionType: ContextLabel.LinkDetectionType
-    var linkRange: Range<String.Index>
-    var linkString: String
-    var textLink: ContextLabel.TextLink?
+    let linkDetectionType: ContextLabel.LinkDetectionType
+    let linkRange: NSRange
+    let linkString: String
+    let textLink: TextLink?
     
     // MARK: Initializers
     
-    init(linkDetectionType: ContextLabel.LinkDetectionType, linkRange: Range<String.Index>, linkString: String, textLink: ContextLabel.TextLink?) {
+    init(linkDetectionType: ContextLabel.LinkDetectionType, linkRange: NSRange, linkString: String, textLink: TextLink?) {
         self.linkDetectionType = linkDetectionType
         self.linkRange = linkRange
         self.linkString = linkString
@@ -300,7 +300,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
 
         if let linkRangeResult = getLinkRangeResultWithTouches(touches) {
             
-            if linkRangeResult.linkRange.startIndex != selectedLinkRangeResult?.linkRange.startIndex  {
+            if linkRangeResult.linkRange.location != selectedLinkRangeResult?.linkRange.location  {
                 if let selectedLinkRangeResult = selectedLinkRangeResult, attributedText = attributedText {
                     self.attributedText = addLinkAttributesToAttributedString(attributedText, withLinkRangeResults: [selectedLinkRangeResult], highlighted: false)
                 }
@@ -492,8 +492,10 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         for textLink in textLinks {
             let linkType = LinkDetectionType.TextLink
             let matchString = textLink.text
-            if let stringIndexRange = text.rangeOfString(textLink.text, options: .CaseInsensitiveSearch) {
-                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange, linkString: matchString, textLink: textLink))
+            let matchRange = NSString(string: text).rangeOfString(matchString)
+            
+            if matchRange.location < text.characters.count {
+                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: textLink))
             }
         }
         
@@ -528,10 +530,9 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             // Add all our ranges to the result
             for match in matches {
                 let matchRange = match.range
-                let stringIndexRange = text.startIndex.advancedBy(matchRange.location)..<text.startIndex.advancedBy(matchRange.location + matchRange.length)
-                let matchString = text.substringWithRange(stringIndexRange)
+                let matchString = NSString(string: text).substringWithRange(matchRange)
                 
-                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange, linkString: matchString, textLink: nil))
+                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: nil))
             }
         }
 
@@ -557,18 +558,16 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             // Add a range entry for every url we found
             for match in matches {
                 let matchRange = match.range
-                let stringIndexRange = text.startIndex.advancedBy(matchRange.location)..<text.startIndex.advancedBy(matchRange.location + matchRange.length)
                 
                 // If there's a link embedded in the attributes, use that instead of the raw text
                 var realURL: AnyObject? = attributedString.attribute(NSLinkAttributeName, atIndex: matchRange.location, effectiveRange: nil)
                 if realURL == nil {
-                    let range = text.startIndex.advancedBy(matchRange.location)..<text.startIndex.advancedBy(matchRange.location + matchRange.length)
-                    realURL = plainText.substringWithRange(range)
+                    realURL = NSString(string: plainText).substringWithRange(matchRange)
                 }
                 
                 if match.resultType == .Link {
                     if let matchString = realURL as? String {
-                        rangesForURLs.append(LinkRangeResult(linkDetectionType: LinkDetectionType.URL, linkRange: stringIndexRange, linkString: matchString, textLink: nil))
+                        rangesForURLs.append(LinkRangeResult(linkDetectionType: LinkDetectionType.URL, linkRange: matchRange, linkString: matchString, textLink: nil))
                     }
                 }
             }
@@ -607,11 +606,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             }
             
             if let attributes = attributes {
-                let location = text.startIndex.distanceTo(linkRangeResult.linkRange.startIndex)
-                let length = linkRangeResult.linkRange.startIndex.distanceTo(linkRangeResult.linkRange.endIndex)
-                let range = NSMakeRange(location, length)
-                
-                mutableAttributedString.setAttributes(attributes, range: range)
+                mutableAttributedString.setAttributes(attributes, range: linkRangeResult.linkRange)
             }
         }
         
@@ -641,8 +636,8 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         if characterIndex <= textStorage?.length {
             if let linkRangeResults = contextLabelData?.linkRangeResults {
                 for linkRangeResult in linkRangeResults {
-                    let rangeLocation = text.startIndex.distanceTo(linkRangeResult.linkRange.startIndex)
-                    let rangeLength = linkRangeResult.linkRange.startIndex.distanceTo(linkRangeResult.linkRange.endIndex)
+                    let rangeLocation = linkRangeResult.linkRange.location
+                    let rangeLength = linkRangeResult.linkRange.length
                     
                     if rangeLocation <= characterIndex &&
                         (rangeLocation + rangeLength - 1) >= characterIndex {
