@@ -65,6 +65,9 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         static var URL: LinkDetectionType { return LinkDetectionType(1 << 2) }
         static var TextLink: LinkDetectionType { return LinkDetectionType(1 << 3) }
     }
+  
+    let hashtagRegex = "(?<=\\s|^)#(\\w*[A-Za-z_]+\\w*)"
+    let userHandleRegex = "(?<=\\s|^)@(\\w*[A-Za-z_]+\\w*)"
     
     public struct TextLink {
         var text: String
@@ -503,12 +506,12 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     private func getRangesForUserHandlesInText(text: String) -> [LinkRangeResult] {
-        let rangesForUserHandles = getRangesForLinkType(LinkDetectionType.UserHandle, regexPattern: "(?<!\\w)@([\\w\\_]+)?", text: text)
+        let rangesForUserHandles = getRangesForLinkType(LinkDetectionType.UserHandle, regexPattern: userHandleRegex, text: text)
         return rangesForUserHandles
     }
 
     private func getRangesForHashtagsInText(text: String) -> [LinkRangeResult] {
-        let rangesForHashtags = getRangesForLinkType(LinkDetectionType.Hashtag, regexPattern: "(?<!\\w)#([\\w\\_]+)?", text: text)
+        let rangesForHashtags = getRangesForLinkType(LinkDetectionType.Hashtag, regexPattern: hashtagRegex, text: text)
         return rangesForHashtags
     }
 
