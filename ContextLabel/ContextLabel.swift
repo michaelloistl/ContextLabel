@@ -489,7 +489,9 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         return rangesForLinks
     }
 
-    private func getRangesForTextLinks(textLinks: [TextLink]) -> [LinkRangeResult] {
+    // TEST: testGetRangesForTextLinksWithoutEmojis()
+    // TEST: testGetRangesForTextLinksWithEmojis()
+    func getRangesForTextLinks(textLinks: [TextLink]) -> [LinkRangeResult] {
         var rangesForLinkType = [LinkRangeResult]()
         
         for textLink in textLinks {
@@ -505,12 +507,16 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         return rangesForLinkType
     }
     
-    private func getRangesForUserHandlesInText(text: String) -> [LinkRangeResult] {
+    // TEST: testGetRangesForUserHandlesInTextWithoutEmojis()
+    // TEST: testGetRangesForUserHandlesInTextWithEmojis()
+    func getRangesForUserHandlesInText(text: String) -> [LinkRangeResult] {
         let rangesForUserHandles = getRangesForLinkType(LinkDetectionType.UserHandle, regexPattern: userHandleRegex, text: text)
         return rangesForUserHandles
     }
 
-    private func getRangesForHashtagsInText(text: String) -> [LinkRangeResult] {
+    // TEST: testGetRangesForHashtagsInTextWithoutEmojis()
+    // TEST: testGetRangesForHashtagsInTextWithEmojis()
+    func getRangesForHashtagsInText(text: String) -> [LinkRangeResult] {
         let rangesForHashtags = getRangesForLinkType(LinkDetectionType.Hashtag, regexPattern: hashtagRegex, text: text)
         return rangesForHashtags
     }
