@@ -91,6 +91,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     public var hashtagTextColor = UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
     public var linkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
     
+    // TextHighlightColors
     public var textLinkHighlightedTextColor: UIColor?
     public var userHandleHighlightedTextColor: UIColor?
     public var hashtagHighlightedTextColor: UIColor?
