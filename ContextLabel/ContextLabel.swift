@@ -532,7 +532,9 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
                 let matchRange = match.range
                 let matchString = NSString(string: text).substringWithRange(matchRange)
                 
-                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: nil))
+                if matchRange.length > 1 {
+                    rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: nil))
+                }
             }
         }
 
