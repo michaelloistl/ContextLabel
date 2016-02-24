@@ -13,6 +13,29 @@ public protocol ContextLabelDelegate {
     func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult)
     func contextLabel(contextLabel: ContextLabel, movedTouchTo text: String, with linkRangeResult: LinkRangeResult)
     func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: LinkRangeResult)
+    
+    func contextLabel(contextLabel: ContextLabel, textLinkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+    func contextLabel(contextLabel: ContextLabel, userHandleTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+    func contextLabel(contextLabel: ContextLabel, hashtagTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+    func contextLabel(contextLabel: ContextLabel, linkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+}
+
+public extension ContextLabelDelegate {
+    func contextLabel(contextLabel: ContextLabel, textLinkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor? {
+        return nil
+    }
+    
+    func contextLabel(contextLabel: ContextLabel, userHandleTextColorFor linkRangeResult: LinkRangeResult) -> UIColor? {
+        return nil
+    }
+    
+    func contextLabel(contextLabel: ContextLabel, hashtagTextColorFor linkRangeResult: LinkRangeResult) -> UIColor? {
+        return nil
+    }
+    
+    func contextLabel(contextLabel: ContextLabel, linkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor? {
+        return nil
+    }
 }
 
 public class ContextLabelData: NSObject {
@@ -30,10 +53,10 @@ public class ContextLabelData: NSObject {
 }
 
 public class LinkRangeResult: NSObject {
-    let linkDetectionType: ContextLabel.LinkDetectionType
-    let linkRange: NSRange
-    let linkString: String
-    let textLink: TextLink?
+    public let linkDetectionType: ContextLabel.LinkDetectionType
+    public let linkRange: NSRange
+    public let linkString: String
+    public let textLink: TextLink?
     
     // MARK: Initializers
     
@@ -54,15 +77,15 @@ public struct TextLink {
 
 public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
-    struct LinkDetectionType : OptionSetType {
-        typealias RawValue = UInt
+    public struct LinkDetectionType : OptionSetType {
+        public typealias RawValue = UInt
         private var value: UInt = 0
         init(_ value: UInt) { self.value = value }
-        init(rawValue value: UInt) { self.value = value }
+        public init(rawValue value: UInt) { self.value = value }
         init(nilLiteral: ()) { self.value = 0 }
         static var allZeros: LinkDetectionType { return self.init(0) }
         static func fromMask(raw: UInt) -> LinkDetectionType { return self.init(raw) }
-        var rawValue: UInt { return self.value }
+        public var rawValue: UInt { return self.value }
         
         static var None: LinkDetectionType { return self.init(0) }
         static var UserHandle: LinkDetectionType { return LinkDetectionType(1 << 0) }
@@ -596,26 +619,27 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             var attributes: [String: AnyObject]?
             
             if linkRangeResult.linkDetectionType == .TextLink {
+                let textLinkTextColor = delegate?.contextLabel(self, textLinkTextColorFor: linkRangeResult) ?? self.textLinkTextColor
                 let color = highlighted ? privateTextLinkHighlightedTextColor : textLinkTextColor
                 attributes = attributesWithTextColor(color, underlineStyle: textLinkUnderlineStyle)
             }
             
             if linkRangeResult.linkDetectionType == .UserHandle {
+                let userHandleTextColor = delegate?.contextLabel(self, userHandleTextColorFor: linkRangeResult) ?? self.userHandleTextColor
                 let color = highlighted ? privateUserHandleHighlightedTextColor : userHandleTextColor
                 attributes = attributesWithTextColor(color, underlineStyle: userHandleUnderlineStyle)
-                
             }
             
             if linkRangeResult.linkDetectionType == .Hashtag {
+                let hashtagTextColor = delegate?.contextLabel(self, hashtagTextColorFor: linkRangeResult) ?? self.hashtagTextColor
                 let color = highlighted ? privateHashtagHighlightedTextColor : hashtagTextColor
                 attributes = attributesWithTextColor(color, underlineStyle: hashtagUnderlineStyle)
-                
             }
             
             if linkRangeResult.linkDetectionType == .URL {
+                let linkTextColor = delegate?.contextLabel(self, linkTextColorFor: linkRangeResult) ?? self.linkTextColor
                 let color = highlighted ? privateLinkHighlightedTextColor : linkTextColor
                 attributes = attributesWithTextColor(color, underlineStyle: linkUnderlineStyle)
-                
             }
             
             if let attributes = attributes {
