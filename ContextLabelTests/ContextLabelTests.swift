@@ -21,16 +21,141 @@ class ContextLabelTests: XCTestCase {
         super.tearDown()
     }
     
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testGetRangesForTextLinksWithoutEmojis() {
+        let textLink1 = TextLink(text: "link1", action: { })
+        let textLink2 = TextLink(text: "link2", action: { })
+        let textLink3 = TextLink(text: "link3", action: { })
+        
+        let textLinks = [textLink1, textLink2, textLink3]
+        
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "Testing link1 and link2 without emojis"
+        
+        let linkRangeResults = contextLabel.getRangesForTextLinks(textLinks)
+        
+        XCTAssertEqual(linkRangeResults.count, 2)
+        
+        let linkRangeResult1 = linkRangeResults[0]
+        XCTAssertEqual(linkRangeResult1.linkString, "link1")
+        XCTAssertNotNil(linkRangeResult1.textLink)
+        XCTAssertEqual(linkRangeResult1.textLink?.text, "link1")
+        XCTAssertEqual(linkRangeResult1.linkRange.location, 8)
+        XCTAssertEqual(linkRangeResult1.linkRange.length, 5)
+        
+        let linkRangeResult2 = linkRangeResults[1]
+        XCTAssertEqual(linkRangeResult2.linkString, "link2")
+        XCTAssertNotNil(linkRangeResult2.textLink)
+        XCTAssertEqual(linkRangeResult2.textLink?.text, "link2")
+        XCTAssertEqual(linkRangeResult2.linkRange.location, 18)
+        XCTAssertEqual(linkRangeResult2.linkRange.length, 5)
     }
     
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measureBlock {
-            // Put the code you want to measure the time of here.
-        }
+    func testGetRangesForTextLinksWithEmojis() {
+        let textLink1 = TextLink(text: "link😊", action: { })
+        let textLink2 = TextLink(text: "link2", action: { })
+        let textLink3 = TextLink(text: "link3", action: { })
+        
+        let textLinks = [textLink1, textLink2, textLink3]
+        
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "Testing ☕️🍪 link😊 and ☕️🍪 link2 with emojis 👍"
+        
+        let linkRangeResults = contextLabel.getRangesForTextLinks(textLinks)
+        
+        XCTAssertEqual(linkRangeResults.count, 2)
+        
+        let linkRangeResult1 = linkRangeResults[0]
+        XCTAssertEqual(linkRangeResult1.linkString, "link😊")
+        XCTAssertNotNil(linkRangeResult1.textLink)
+        XCTAssertEqual(linkRangeResult1.textLink?.text, "link😊")
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult1.linkRange), "link😊")
+        
+        let linkRangeResult2 = linkRangeResults[1]
+        XCTAssertEqual(linkRangeResult2.linkString, "link2")
+        XCTAssertNotNil(linkRangeResult2.textLink)
+        XCTAssertEqual(linkRangeResult2.textLink?.text, "link2")
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult2.linkRange), "link2")
+    }
+    
+    func testGetRangesForUserHandlesInTextWithoutEmojis() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "Testing #tag1 @user1 #and @user2 #tag4 # @ @@user @#user without emojis"
+        
+        let linkRangeResults = contextLabel.getRangesForUserHandlesInText(contextLabel.text)
+        
+        XCTAssertEqual(linkRangeResults.count, 2)
+        
+        let linkRangeResult1 = linkRangeResults[0]
+        XCTAssertEqual(linkRangeResult1.linkString, "@user1")
+        XCTAssertNil(linkRangeResult1.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult1.linkRange), "@user1")
+        
+        let linkRangeResult2 = linkRangeResults[1]
+        XCTAssertEqual(linkRangeResult2.linkString, "@user2")
+        XCTAssertNil(linkRangeResult2.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult2.linkRange), "@user2")
+    }
+    
+    func testGetRangesForUserHandlesInTextWithEmojis() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "Testing ☕️🍪 #tag1 ☕️🍪 @user1😊 #and @user2☕️emoji #tag4 # @ @@user @#user with emojis 👍"
+        
+        let linkRangeResults = contextLabel.getRangesForUserHandlesInText(contextLabel.text)
+        
+        XCTAssertEqual(linkRangeResults.count, 2)
+        
+        let linkRangeResult1 = linkRangeResults[0]
+        XCTAssertEqual(linkRangeResult1.linkString, "@user1")
+        XCTAssertNil(linkRangeResult1.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult1.linkRange), "@user1")
+        
+        let linkRangeResult2 = linkRangeResults[1]
+        XCTAssertEqual(linkRangeResult2.linkString, "@user2")
+        XCTAssertNil(linkRangeResult2.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult2.linkRange), "@user2")
+    }
+    
+    func testGetRangesForHashtagsInTextWithoutEmojis() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "Testing #tag1 @and #tag2 @user # @ @@user @#tag without emojis"
+        
+        let linkRangeResults = contextLabel.getRangesForHashtagsInText(contextLabel.text)
+        
+        XCTAssertEqual(linkRangeResults.count, 2)
+        
+        let linkRangeResult1 = linkRangeResults[0]
+        XCTAssertEqual(linkRangeResult1.linkString, "#tag1")
+        XCTAssertNil(linkRangeResult1.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult1.linkRange), "#tag1")
+        
+        let linkRangeResult2 = linkRangeResults[1]
+        XCTAssertEqual(linkRangeResult2.linkString, "#tag2")
+        XCTAssertNil(linkRangeResult2.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult2.linkRange), "#tag2")
+    }
+
+    func testGetRangesForHashtagsInTextWithEmojis() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "Testing ☕️🍪 #tag1 ☕️🍪 @and #tag2😊 @user #tag3☕️emoji # @ @@user @#tag with emojis 👍"
+        
+        let linkRangeResults = contextLabel.getRangesForHashtagsInText(contextLabel.text)
+        
+        XCTAssertEqual(linkRangeResults.count, 3)
+        
+        let linkRangeResult1 = linkRangeResults[0]
+        XCTAssertEqual(linkRangeResult1.linkString, "#tag1")
+        XCTAssertNil(linkRangeResult1.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult1.linkRange), "#tag1")
+        
+        let linkRangeResult2 = linkRangeResults[1]
+        XCTAssertEqual(linkRangeResult2.linkString, "#tag2")
+        XCTAssertNil(linkRangeResult2.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult2.linkRange), "#tag2")
+        
+        let linkRangeResult3 = linkRangeResults[2]
+        XCTAssertEqual(linkRangeResult3.linkString, "#tag3")
+        XCTAssertNil(linkRangeResult3.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult3.linkRange), "#tag3")
     }
     
 }

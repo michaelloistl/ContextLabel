@@ -9,10 +9,46 @@
 import Foundation
 import UIKit
 
-protocol ContextLabelDelegate {
+public protocol ContextLabelDelegate {
     func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult)
     func contextLabel(contextLabel: ContextLabel, movedTouchTo text: String, with linkRangeResult: LinkRangeResult)
     func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: LinkRangeResult)
+
+    func contextLabel(contextLabel: ContextLabel, textLinkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+    func contextLabel(contextLabel: ContextLabel, userHandleTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+    func contextLabel(contextLabel: ContextLabel, hashtagTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+    func contextLabel(contextLabel: ContextLabel, linkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+}
+
+public extension ContextLabelDelegate {
+    
+    func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult) {
+        
+    }
+    
+    func contextLabel(contextLabel: ContextLabel, movedTouchTo text: String, with linkRangeResult: LinkRangeResult) {
+        
+    }
+    
+    func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: LinkRangeResult) {
+        
+    }
+
+    func contextLabel(contextLabel: ContextLabel, textLinkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor? {
+        return nil
+    }
+    
+    func contextLabel(contextLabel: ContextLabel, userHandleTextColorFor linkRangeResult: LinkRangeResult) -> UIColor? {
+        return nil
+    }
+    
+    func contextLabel(contextLabel: ContextLabel, hashtagTextColorFor linkRangeResult: LinkRangeResult) -> UIColor? {
+        return nil
+    }
+    
+    func contextLabel(contextLabel: ContextLabel, linkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor? {
+        return nil
+    }
 }
 
 public class ContextLabelData: NSObject {
@@ -29,35 +65,29 @@ public class ContextLabelData: NSObject {
     }
 }
 
-public class LinkRangeResult: NSObject {
-    var linkDetectionType: ContextLabel.LinkDetectionType
-    var linkRange: Range<String.Index>
-    var linkString: String
-    var textLink: ContextLabel.TextLink?
-    
-    // MARK: Initializers
-    
-    init(linkDetectionType: ContextLabel.LinkDetectionType, linkRange: Range<String.Index>, linkString: String, textLink: ContextLabel.TextLink?) {
-        self.linkDetectionType = linkDetectionType
-        self.linkRange = linkRange
-        self.linkString = linkString
-        self.textLink = textLink
-        
-        super.init()
-    }
+public struct LinkRangeResult {
+    public let linkDetectionType: ContextLabel.LinkDetectionType
+    public let linkRange: NSRange
+    public let linkString: String
+    public let textLink: TextLink?
+}
+
+public struct TextLink {
+    var text: String
+    var action: ()->()
 }
 
 public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
-    struct LinkDetectionType : OptionSetType {
-        typealias RawValue = UInt
+    public struct LinkDetectionType : OptionSetType {
+        public typealias RawValue = UInt
         private var value: UInt = 0
         init(_ value: UInt) { self.value = value }
-        init(rawValue value: UInt) { self.value = value }
+        public init(rawValue value: UInt) { self.value = value }
         init(nilLiteral: ()) { self.value = 0 }
         static var allZeros: LinkDetectionType { return self.init(0) }
         static func fromMask(raw: UInt) -> LinkDetectionType { return self.init(raw) }
-        var rawValue: UInt { return self.value }
+        public var rawValue: UInt { return self.value }
         
         static var None: LinkDetectionType { return self.init(0) }
         static var UserHandle: LinkDetectionType { return LinkDetectionType(1 << 0) }
@@ -65,31 +95,38 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         static var URL: LinkDetectionType { return LinkDetectionType(1 << 2) }
         static var TextLink: LinkDetectionType { return LinkDetectionType(1 << 3) }
     }
+  
+    let hashtagRegex = "(?<=\\s|^)#(\\w*[A-Za-z_]+\\w*)"
+    let userHandleRegex = "(?<=\\s|^)@(\\w*[A-Za-z_]+\\w*)"
     
-    public struct TextLink {
-        var text: String
-        var action: ()->()
-    }
-    
+//    let emojiRegex = "[\u{00002712}\u{00002714}\u{00002716}\u{0000271d}\u{00002721}\u{00002728}\u{00002733}\u{00002734}\u{00002744}\u{00002747}\u{0000274c}\u{0000274e}\u{00002753}-\u{00002755}\u{00002757}\u{00002763}\u{00002764}\u{00002795}-\u{00002797}\u{000027a1}\u{000027b0}\u{000027bf}\u{00002934}\u{00002935}\u{00002b05}-\u{00002b07}\u{00002b1b}\u{00002b1c}\u{00002b50}\u{00002b55}\u{00003030}\u{0000303d}\u{0001f004}\u{0001f0cf}\u{0001f170}\u{0001f171}\u{0001f17e}\u{0001f17f}\u{0001f18e}\u{0001f191}-\u{0001f19a}\u{0001f201}\u{0001f202}\u{0001f21a}\u{0001f22f}\u{0001f232}-\u{0001f23a}\u{0001f250}\u{0001f251}\u{0001f300}-\u{0001f321}\u{0001f324}-\u{0001f393}\u{0001f396}\u{0001f397}\u{0001f399}-\u{0001f39b}\u{0001f39e}-\u{0001f3f0}\u{0001f3f3}-\u{0001f3f5}\u{0001f3f7}-\u{0001f4fd}\u{0001f4ff}-\u{0001f53d}\u{0001f549}-\u{0001f54e}\u{0001f550}-\u{0001f567}\u{0001f56f}\u{0001f570}\u{0001f573}-\u{0001f579}\u{0001f587}\u{0001f58a}-\u{0001f58d}\u{0001f590}\u{0001f595}\u{0001f596}\u{0001f5a5}\u{0001f5a8}\u{0001f5b1}\u{0001f5b2}\u{0001f5bc}\u{0001f5c2}-\u{0001f5c4}\u{0001f5d1}-\u{0001f5d3}\u{0001f5dc}-\u{0001f5de}\u{0001f5e1}\u{0001f5e3}\u{0001f5ef}\u{0001f5f3}\u{0001f5fa}-\u{0001f64f}\u{0001f680}-\u{0001f6c5}\u{0001f6cb}-\u{0001f6d0}\u{0001f6e0}-\U0001f6e5\U0001f6e9\U0001f6eb\U0001f6ec\U0001f6f0\U0001f6f3\U0001f910-\U0001f918\U0001f980-\U0001f984\U0001f9c0\U00003297\U00003299\U000000a9\U000000ae\U0000203c\U00002049\U00002122\U00002139\U00002194-\U00002199\U000021a9\U000021aa\U0000231a\U0000231b\U00002328\U00002388\U000023cf\U000023e9-\U000023f3\U000023f8-\U000023fa\U000024c2\U000025aa\U000025ab\U000025b6\U000025c0\U000025fb-\U000025fe\U00002600-\U00002604\U0000260e\U00002611\U00002614\U00002615\U00002618\U0000261d\U00002620\U00002622\U00002623\U00002626\U0000262a\U0000262e\U0000262f\U00002638-\U0000263a\U00002648-\U00002653\U00002660\U00002663\U00002665\U00002666\U00002668\U0000267b\U0000267f\U00002692-\U00002694\U00002696\U00002697\U00002699\U0000269b\U0000269c\U000026a0\U000026a1\U000026aa\U000026ab\U000026b0\U000026b1\U000026bd\U000026be\U000026c4\U000026c5\U000026c8\U000026ce\U000026cf\U000026d1\U000026d3\U000026d4\U000026e9\U000026ea\U000026f0-\U000026f5\U000026f7-\U000026fa\U000026fd\U00002702\U00002705\U00002708-\U0000270d\U0000270f]|[#]\U000020e3|[*]\U000020e3|[0]\U000020e3|[1]\U000020e3|[2]\U000020e3|[3]\U000020e3|[4]\U000020e3|[5]\U000020e3|[6]\U000020e3|[7]\U000020e3|[8]\U000020e3|[9]\U000020e3|\U0001f1e6[\U0001f1e8-\U0001f1ec\U0001f1ee\U0001f1f1\U0001f1f2\U0001f1f4\U0001f1f6-\U0001f1fa\U0001f1fc\U0001f1fd\U0001f1ff]|\U0001f1e7[\U0001f1e6\U0001f1e7\U0001f1e9-\U0001f1ef\U0001f1f1-\U0001f1f4\U0001f1f6-\U0001f1f9\U0001f1fb\U0001f1fc\U0001f1fe\U0001f1ff]|\U0001f1e8[\U0001f1e6\U0001f1e8\U0001f1e9\U0001f1eb-\U0001f1ee\U0001f1f0-\U0001f1f5\U0001f1f7\U0001f1fa-\U0001f1ff]|\U0001f1e9[\U0001f1ea\U0001f1ec\U0001f1ef\U0001f1f0\U0001f1f2\U0001f1f4\U0001f1ff]|\U0001f1ea[\U0001f1e6\U0001f1e8\U0001f1ea\U0001f1ec\U0001f1ed\U0001f1f7-\U0001f1fa]|\U0001f1eb[\U0001f1ee-\U0001f1f0\U0001f1f2\U0001f1f4\U0001f1f7]|\U0001f1ec[\U0001f1e6\U0001f1e7\U0001f1e9-\U0001f1ee\U0001f1f1-\U0001f1f3\U0001f1f5-\U0001f1fa\U0001f1fc\U0001f1fe]|\U0001f1ed[\U0001f1f0\U0001f1f2\U0001f1f3\U0001f1f7\U0001f1f9\U0001f1fa]|\U0001f1ee[\U0001f1e8-\U0001f1ea\U0001f1f1-\U0001f1f4\U0001f1f6-\U0001f1f9]|\U0001f1ef[\U0001f1ea\U0001f1f2\U0001f1f4\U0001f1f5]|\U0001f1f0[\U0001f1ea\U0001f1ec-\U0001f1ee\U0001f1f2\U0001f1f3\U0001f1f5\U0001f1f7\U0001f1fc\U0001f1fe\U0001f1ff]|\U0001f1f1[\U0001f1e6-\U0001f1e8\U0001f1ee\U0001f1f0\U0001f1f7-\U0001f1fb\U0001f1fe]|\U0001f1f2[\U0001f1e6\U0001f1e8-\U0001f1ed\U0001f1f0-\U0001f1ff]|\U0001f1f3[\U0001f1e6\U0001f1e8\U0001f1ea-\U0001f1ec\U0001f1ee\U0001f1f1\U0001f1f4\U0001f1f5\U0001f1f7\U0001f1fa\U0001f1ff]|\U0001f1f4\U0001f1f2|\U0001f1f5[\U0001f1e6\U0001f1ea-\U0001f1ed\U0001f1f0-\U0001f1f3\U0001f1f7-\U0001f1f9\U0001f1fc\U0001f1fe]|\U0001f1f6\U0001f1e6|\U0001f1f7[\U0001f1ea\U0001f1f4\U0001f1f8\U0001f1fa\U0001f1fc]|\U0001f1f8[\U0001f1e6-\U0001f1ea\U0001f1ec-\U0001f1f4\U0001f1f7-\U0001f1f9\U0001f1fb\U0001f1fd-\U0001f1ff]|\U0001f1f9[\U0001f1e6\U0001f1e8\U0001f1e9\U0001f1eb-\U0001f1ed\U0001f1ef-\U0001f1f4\U0001f1f7\U0001f1f9\U0001f1fb\U0001f1fc\U0001f1ff]|\U0001f1fa[\U0001f1e6\U0001f1ec\U0001f1f2\U0001f1f8\U0001f1fe\U0001f1ff]|\U0001f1fb[\U0001f1e6\U0001f1e8\U0001f1ea\U0001f1ec\U0001f1ee\U0001f1f3\U0001f1fa]|\U0001f1fc[\U0001f1eb\U0001f1f8]|\U0001f1fd\U0001f1f0|\U0001f1fe[\U0001f1ea\U0001f1f9]|\U0001f1ff[\U0001f1e6\U0001f1f2\U0001f1fc]"
+
     // Delegate
-    var delegate: ContextLabelDelegate?
-    
+    public var delegate: ContextLabelDelegate?
     
     // MARK: - Config Properties
     
     // LineSpacing
-    var lineSpacing: CGFloat?
+    public var lineSpacing: CGFloat?
+    public var lineHeightMultiple: CGFloat?
     
     // TextColors
-    var textLinkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
-    var userHandleTextColor = UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
-    var hashtagTextColor = UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
-    var linkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+    public var textLinkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+    public var userHandleTextColor = UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
+    public var hashtagTextColor = UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
+    public var linkTextColor = UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
     
-    var textLinkHighlightedTextColor: UIColor?
-    var userHandleHighlightedTextColor: UIColor?
-    var hashtagHighlightedTextColor: UIColor?
-    var linkHighlightedTextColor: UIColor?
+    // TextHighlightColors
+    public var textLinkHighlightedTextColor: UIColor?
+    public var userHandleHighlightedTextColor: UIColor?
+    public var hashtagHighlightedTextColor: UIColor?
+    public var linkHighlightedTextColor: UIColor?
+    
+    // UnderlineStyle
+    public var textLinkUnderlineStyle: NSUnderlineStyle = .StyleNone
+    public var userHandleUnderlineStyle: NSUnderlineStyle = .StyleNone
+    public var hashtagUnderlineStyle: NSUnderlineStyle = .StyleNone
+    public var linkUnderlineStyle: NSUnderlineStyle = .StyleNone
     
     // MARK: - Private Properties
     
@@ -293,7 +330,7 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
 
         if let linkRangeResult = getLinkRangeResultWithTouches(touches) {
             
-            if linkRangeResult.linkRange.startIndex != selectedLinkRangeResult?.linkRange.startIndex  {
+            if linkRangeResult.linkRange.location != selectedLinkRangeResult?.linkRange.location  {
                 if let selectedLinkRangeResult = selectedLinkRangeResult, attributedText = attributedText {
                     self.attributedText = addLinkAttributesToAttributedString(attributedText, withLinkRangeResults: [selectedLinkRangeResult], highlighted: false)
                 }
@@ -413,6 +450,11 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             mutableParagraphStyle.lineSpacing = lineSpacing
         }
         
+        // LineHeightMultiple
+        if let lineHeightMultiple = lineHeightMultiple {
+            mutableParagraphStyle.lineHeightMultiple = lineHeightMultiple
+        }
+        
         // Attributes dictionary
         let attributes = [NSFontAttributeName: self.font,
             NSForegroundColorAttributeName: color,
@@ -425,6 +467,13 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     private func attributesWithTextColor(textColor: UIColor) -> [String: AnyObject] {
         var attributes = attributesFromProperties()
         attributes[NSForegroundColorAttributeName] = textColor
+        
+        return attributes
+    }
+    
+    private func attributesWithTextColor(textColor: UIColor, underlineStyle: NSUnderlineStyle) -> [String: AnyObject] {
+        var attributes = attributesWithTextColor(textColor)
+        attributes[NSUnderlineStyleAttributeName] = underlineStyle.rawValue
         
         return attributes
     }
@@ -467,27 +516,35 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         return rangesForLinks
     }
 
-    private func getRangesForTextLinks(textLinks: [TextLink]) -> [LinkRangeResult] {
+    // TEST: testGetRangesForTextLinksWithoutEmojis()
+    // TEST: testGetRangesForTextLinksWithEmojis()
+    func getRangesForTextLinks(textLinks: [TextLink]) -> [LinkRangeResult] {
         var rangesForLinkType = [LinkRangeResult]()
         
         for textLink in textLinks {
             let linkType = LinkDetectionType.TextLink
             let matchString = textLink.text
-            if let stringIndexRange = text.rangeOfString(textLink.text, options: .CaseInsensitiveSearch) {
-                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange, linkString: matchString, textLink: textLink))
+            let matchRange = NSString(string: text).rangeOfString(matchString)
+            
+            if matchRange.location < text.characters.count {
+                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: textLink))
             }
         }
         
         return rangesForLinkType
     }
     
-    private func getRangesForUserHandlesInText(text: String) -> [LinkRangeResult] {
-        let rangesForUserHandles = getRangesForLinkType(LinkDetectionType.UserHandle, regexPattern: "(?<!\\w)@([\\w\\_]+)?", text: text)
+    // TEST: testGetRangesForUserHandlesInTextWithoutEmojis()
+    // TEST: testGetRangesForUserHandlesInTextWithEmojis()
+    func getRangesForUserHandlesInText(text: String) -> [LinkRangeResult] {
+        let rangesForUserHandles = getRangesForLinkType(LinkDetectionType.UserHandle, regexPattern: userHandleRegex, text: text)
         return rangesForUserHandles
     }
 
-    private func getRangesForHashtagsInText(text: String) -> [LinkRangeResult] {
-        let rangesForHashtags = getRangesForLinkType(LinkDetectionType.Hashtag, regexPattern: "(?<!\\w)#([\\w\\_]+)?", text: text)
+    // TEST: testGetRangesForHashtagsInTextWithoutEmojis()
+    // TEST: testGetRangesForHashtagsInTextWithEmojis()
+    func getRangesForHashtagsInText(text: String) -> [LinkRangeResult] {
+        let rangesForHashtags = getRangesForLinkType(LinkDetectionType.Hashtag, regexPattern: hashtagRegex, text: text)
         return rangesForHashtags
     }
 
@@ -509,10 +566,11 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             // Add all our ranges to the result
             for match in matches {
                 let matchRange = match.range
-                let stringIndexRange = text.startIndex.advancedBy(matchRange.location)..<text.startIndex.advancedBy(matchRange.location + matchRange.length)
-                let matchString = text.substringWithRange(stringIndexRange)
+                let matchString = NSString(string: text).substringWithRange(matchRange)
                 
-                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: stringIndexRange, linkString: matchString, textLink: nil))
+                if matchRange.length > 1 {
+                    rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: nil))
+                }
             }
         }
 
@@ -538,18 +596,16 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             // Add a range entry for every url we found
             for match in matches {
                 let matchRange = match.range
-                let stringIndexRange = text.startIndex.advancedBy(matchRange.location)..<text.startIndex.advancedBy(matchRange.location + matchRange.length)
                 
                 // If there's a link embedded in the attributes, use that instead of the raw text
                 var realURL: AnyObject? = attributedString.attribute(NSLinkAttributeName, atIndex: matchRange.location, effectiveRange: nil)
                 if realURL == nil {
-                    let range = text.startIndex.advancedBy(matchRange.location)..<text.startIndex.advancedBy(matchRange.location + matchRange.length)
-                    realURL = plainText.substringWithRange(range)
+                    realURL = NSString(string: plainText).substringWithRange(matchRange)
                 }
                 
                 if match.resultType == .Link {
                     if let matchString = realURL as? String {
-                        rangesForURLs.append(LinkRangeResult(linkDetectionType: LinkDetectionType.URL, linkRange: stringIndexRange, linkString: matchString, textLink: nil))
+                        rangesForURLs.append(LinkRangeResult(linkDetectionType: LinkDetectionType.URL, linkRange: matchRange, linkString: matchString, textLink: nil))
                     }
                 }
             }
@@ -565,31 +621,31 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             var attributes: [String: AnyObject]?
             
             if linkRangeResult.linkDetectionType == .TextLink {
+                let textLinkTextColor = delegate?.contextLabel(self, textLinkTextColorFor: linkRangeResult) ?? self.textLinkTextColor
                 let color = highlighted ? privateTextLinkHighlightedTextColor : textLinkTextColor
-                attributes = attributesWithTextColor(color)
+                attributes = attributesWithTextColor(color, underlineStyle: textLinkUnderlineStyle)
             }
             
             if linkRangeResult.linkDetectionType == .UserHandle {
+                let userHandleTextColor = delegate?.contextLabel(self, userHandleTextColorFor: linkRangeResult) ?? self.userHandleTextColor
                 let color = highlighted ? privateUserHandleHighlightedTextColor : userHandleTextColor
-                attributes = attributesWithTextColor(color)
+                attributes = attributesWithTextColor(color, underlineStyle: userHandleUnderlineStyle)
             }
             
             if linkRangeResult.linkDetectionType == .Hashtag {
+                let hashtagTextColor = delegate?.contextLabel(self, hashtagTextColorFor: linkRangeResult) ?? self.hashtagTextColor
                 let color = highlighted ? privateHashtagHighlightedTextColor : hashtagTextColor
-                attributes = attributesWithTextColor(color)
+                attributes = attributesWithTextColor(color, underlineStyle: hashtagUnderlineStyle)
             }
             
             if linkRangeResult.linkDetectionType == .URL {
+                let linkTextColor = delegate?.contextLabel(self, linkTextColorFor: linkRangeResult) ?? self.linkTextColor
                 let color = highlighted ? privateLinkHighlightedTextColor : linkTextColor
-                attributes = attributesWithTextColor(color)
+                attributes = attributesWithTextColor(color, underlineStyle: linkUnderlineStyle)
             }
             
             if let attributes = attributes {
-                let location = text.startIndex.distanceTo(linkRangeResult.linkRange.startIndex)
-                let length = linkRangeResult.linkRange.startIndex.distanceTo(linkRangeResult.linkRange.endIndex)
-                let range = NSMakeRange(location, length)
-                
-                mutableAttributedString.setAttributes(attributes, range: range)
+                mutableAttributedString.setAttributes(attributes, range: linkRangeResult.linkRange)
             }
         }
         
@@ -619,8 +675,8 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
         if characterIndex <= textStorage?.length {
             if let linkRangeResults = contextLabelData?.linkRangeResults {
                 for linkRangeResult in linkRangeResults {
-                    let rangeLocation = text.startIndex.distanceTo(linkRangeResult.linkRange.startIndex)
-                    let rangeLength = linkRangeResult.linkRange.startIndex.distanceTo(linkRangeResult.linkRange.endIndex)
+                    let rangeLocation = linkRangeResult.linkRange.location
+                    let rangeLength = linkRangeResult.linkRange.length
                     
                     if rangeLocation <= characterIndex &&
                         (rangeLocation + rangeLength - 1) >= characterIndex {
@@ -641,5 +697,25 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
     private func highlightedTextColorForTextColor(textColor: UIColor) -> UIColor {
         return textColor.colorWithAlphaComponent(0.5)
+    }
+}
+
+extension String {
+    
+    func rangeFromNSRange(nsRange : NSRange) -> Range<String.Index>? {
+        let from16 = utf16.startIndex.advancedBy(nsRange.location, limit: utf16.endIndex)
+        let to16 = from16.advancedBy(nsRange.length, limit: utf16.endIndex)
+        if let from = String.Index(from16, within: self),
+            let to = String.Index(to16, within: self) {
+            return from ..< to
+        }
+        return nil
+    }
+    
+    func NSRangeFromRange(range : Range<String.Index>) -> NSRange {
+        let utf16view = self.utf16
+        let from = String.UTF16View.Index(range.startIndex, within: utf16view)
+        let to = String.UTF16View.Index(range.endIndex, within: utf16view)
+        return NSMakeRange(utf16view.startIndex.distanceTo(from), from.distanceTo(to))
     }
 }
