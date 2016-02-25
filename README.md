@@ -3,15 +3,38 @@
 A simple to use drop in replacement for UILabel written in Swift that provides automatic detection of links such as URLs, twitter style usernames and hashtags.
 
 ## How to use it in your project
-ContextLabel doesn't have any special dependencies so just include the files ContextLabel.swift from ContextLabel/Source in your project. Then use the ContextLabel class in replacement for UILabel.
+ContextLabel doesn't have any special dependencies so just include the files ContextLabel.swift in your project. Then use the `ContextLabel` class in replacement for `UILabel`.
 
 ## Text colors
-ContextLabel supports different colors for URLs, twitter style usernames and hashtags. By default the link text colors are set to userHandle RGB(71,90,109), hashtag RGB(151, 154, 158) and url RGB(45, 113, 178). If there is no UIColor set on the highlighted  textColor properties, an alpha of 0.5 is applied to the set text color when a link is detected.
+ContextLabel supports different colors for URLs, twitter style usernames and hashtags. By default the link text colors are set to userHandle RGB(71,90,109), hashtag RGB(151, 154, 158) and url/text links RGB(45, 113, 178). If there is no UIColor set on the highlighted  textColor properties, an alpha of 0.5 is applied to the set text color when a link is detected.
 
-To set your own text colors you can use the convenience initializer ```init(with userHandleTextColor: UIColor, hashtagTextColor: UIColor, linkTextColor: UIColor)```
+To set your own text colors you can use the convenience initializer `init(with userHandleTextColor: UIColor, hashtagTextColor: UIColor, linkTextColor: UIColor)` or just set a different UIColor to to properties `textLinkTextColor`, `userHandleTextColor`, `hashtagTextColor` and `linkTextColor` after initializing `ContextLabel`.
 
-## Delegate
-In order to get the selected string as well as Range you need to adopt the ContextLabelDelegate protocol and implement the ```func contextLabel(contextLabel: ContextLabel, didSelectText: String, inRange: NSRange)```
+From version 0.3.0, text colors can be overwritten by implementing the folowing optional delegate methods:
+``` Swift
+func contextLabel(contextLabel: ContextLabel, textLinkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+func contextLabel(contextLabel: ContextLabel, userHandleTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+func contextLabel(contextLabel: ContextLabel, hashtagTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+func contextLabel(contextLabel: ContextLabel, linkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+```
+
+## Underline style
+From version 0.3.0 you can also set the underline style through the properties `textLinkUnderlineStyle`, `userHandleUnderlineStyle`, `hashtagUnderlineStyle` and `linkUnderlineStyle`.
+
+## Selection handling
+In order to get the selected string, range, detection type and textLink object you need to implement at least one of the following optional delegate methods, depending on when you want to get the selection:
+``` Swift
+func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult)
+func contextLabel(contextLabel: ContextLabel, movedTouchTo text: String, with linkRangeResult: LinkRangeResult)
+func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: LinkRangeResult)
+```
+
+## LinkRangeResult
+Each delegate method includes a `LinkRangeResult` struct which includes
+- linkDetectionType: LinkDetectionType
+- linkRange: NSRange
+- linkString: String
+- textLink: TextLink?
 
 ## Sample code
 
@@ -25,9 +48,9 @@ view.addSubview(contextLabel)
 ```
 
 ### Use of cache
-When setting the text, ContextLabel generates an instance of ```ContextLabelData``` which is a NSObject subclass that can be persisted in order to enable reuse for unchanged data.
+When setting the text, ContextLabel generates an instance of ’ContextLabelData’ which is a NSObject subclass that can be persisted in order to enable reuse for unchanged data.
 
-```ContextLabelData``` holds the actual ```attributedString```, the ```linkRangeResults``` and a ```userInfo``` dictionary which can be used to compare against the model data to see if it’s still valid.
+’ContextLabelData’ holds the actual `attributedString`, the `linkRangeResults` and a userInfo dictionary which can be used to compare against the model data to see if it’s still valid.
 
 ``` swift
 if let cachedContextLabelData: ContextLabelData = … {
@@ -42,13 +65,10 @@ if let cachedContextLabelData: ContextLabelData = … {
 }          
 ```
 
-## Demo
-The Repository includes a Xcode project that shows a simple use of the label in a ViewController with selectable @UserHandle, #Hashtag and link.
-
 ## License & Credits
 ContextLabel is available under the MIT license.
 
-KILabel was inspired by KILabel (https://github.com/Krelborn/KILabel).
+ContextLabel was inspired by KILabel (https://github.com/Krelborn/KILabel).
 
 ## Contact
 - http://michaelloistl.com
