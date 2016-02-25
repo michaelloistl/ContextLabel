@@ -52,22 +52,11 @@ public class ContextLabelData: NSObject {
     }
 }
 
-public class LinkRangeResult: NSObject {
+public struct LinkRangeResult {
     public let linkDetectionType: ContextLabel.LinkDetectionType
     public let linkRange: NSRange
     public let linkString: String
     public let textLink: TextLink?
-    
-    // MARK: Initializers
-    
-    init(linkDetectionType: ContextLabel.LinkDetectionType, linkRange: NSRange, linkString: String, textLink: TextLink?) {
-        self.linkDetectionType = linkDetectionType
-        self.linkRange = linkRange
-        self.linkString = linkString
-        self.textLink = textLink
-        
-        super.init()
-    }
 }
 
 public struct TextLink {
