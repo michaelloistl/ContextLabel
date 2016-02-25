@@ -1,0 +1,22 @@
+# references:
+# * http://www.objc.io/issue-6/travis-ci.html
+# * https://github.com/supermarin/xcpretty#usage
+
+language: objective-c
+# cache: cocoapods
+# podfile: Example/Podfile
+# before_install:
+# - gem install cocoapods # Since Travis is not always on latest version
+# - pod install --project-directory=Example
+
+branches:
+ only:
+ - develop
+
+xcode_project: ContextLabel.xcodeproj
+xcode_scheme: ContextLabelTests
+xcode_sdk: iphonesimulator9.0 
+
+script:
+- xcodebuild clean build test -project ContextLabel.xcodeproj -scheme ContextLabelTests
+- pod lib lint
