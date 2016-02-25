@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/michaelloistl/ContextLabel.svg?branch=master)](https://travis-ci.org/michaelloistl/ContextLabel)
+
 # ContextLabel
 
 A simple to use drop in replacement for UILabel written in Swift that provides automatic detection of links such as URLs, twitter style usernames and hashtags.
