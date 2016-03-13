@@ -49,6 +49,40 @@ contextLabel.delegate = self
 view.addSubview(contextLabel)
 ```
 
+### Use in UITableViewCell
+
+Add instance variable to capture state when user touches text in label:
+
+``` Swift
+var contextLabelTouched = false
+```
+
+In a tableViewCell you need to overwrite `touchesBegan: withEvent:`
+
+``` Swift
+override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    if contextLabelTouched == false {
+        super.touchesBegan(touches, withEvent: event)
+    }
+}
+```
+
+Here you set the instance variable to skip the cell touch to execute:
+``` Swift
+func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult) {
+    contextLabelTouched = true
+}
+```
+
+Here you get the touched text from the label which you pass to MFMailComposeViewController
+``` Swift
+func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: LinkRangeResult) {
+    contextLabelTouched = false
+    
+    // text = ... is the touched text 
+}
+```
+
 ### Use of cache
 When setting the text, ContextLabel generates an instance of ’ContextLabelData’ which is a NSObject subclass that can be persisted in order to enable reuse for unchanged data.
 
