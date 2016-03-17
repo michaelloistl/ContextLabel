@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name = 'ContextLabel'
-    s.version = '0.3.0'
+    s.version = '0.3.1'
     s.license = { :type => 'MIT', :file => 'LICENSE' }
     s.summary = 'A simple to use drop in replacement for UILabel'
     s.description = 'A simple to use drop in replacement for UILabel written in Swift that provides automatic detection of links such as URLs, twitter style usernames and hashtags.'
