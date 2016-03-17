@@ -158,4 +158,44 @@ class ContextLabelTests: XCTestCase {
         XCTAssertEqual(NSString(string: contextLabel.text).substringWithRange(linkRangeResult3.linkRange), "#tag3")
     }
     
+    func testGetRangesForTextLinksWithMultipleOccuranciesWithoutRange() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "one two three one two three one two one"
+        
+        let oneTextLink = TextLink(text: "one", range: nil) { }
+        let twoTextLink = TextLink(text: "two", range: nil) { }
+        let threeTextLink = TextLink(text: "three", range: nil) { }
+        
+        let oneLinkRangeResults = contextLabel.getRangesForTextLinks([oneTextLink])
+        let twoLinkRangeResults = contextLabel.getRangesForTextLinks([twoTextLink])
+        let threeLinkRangeResults = contextLabel.getRangesForTextLinks([threeTextLink])
+        let linkRangeResults = contextLabel.getRangesForTextLinks([oneTextLink, twoTextLink, threeTextLink])
+        
+        XCTAssertEqual(oneLinkRangeResults.count, 4)
+        XCTAssertEqual(twoLinkRangeResults.count, 3)
+        XCTAssertEqual(threeLinkRangeResults.count, 2)
+        XCTAssertEqual(linkRangeResults.count, 4+3+2)
+    }
+    
+    func testGetRangesForTextLinksWithMultipleOccuranciesWithRange() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "one two three one two three one two one"
+        
+        let range = NSMakeRange(0, "one two three on".characters.count)
+        
+        let oneTextLink = TextLink(text: "one", range: range) { }
+        let twoTextLink = TextLink(text: "two", range: range) { }
+        let threeTextLink = TextLink(text: "three", range: range) { }
+        
+        let oneLinkRangeResults = contextLabel.getRangesForTextLinks([oneTextLink])
+        let twoLinkRangeResults = contextLabel.getRangesForTextLinks([twoTextLink])
+        let threeLinkRangeResults = contextLabel.getRangesForTextLinks([threeTextLink])
+        let linkRangeResults = contextLabel.getRangesForTextLinks([oneTextLink, twoTextLink, threeTextLink])
+        
+        XCTAssertEqual(oneLinkRangeResults.count, 1)
+        XCTAssertEqual(twoLinkRangeResults.count, 1)
+        XCTAssertEqual(threeLinkRangeResults.count, 1)
+        XCTAssertEqual(linkRangeResults.count, 1+1+1)
+    }
+     
 }

@@ -10,7 +10,7 @@ ContextLabel doesn't have any special dependencies so just include the files Con
 ## Text colors
 ContextLabel supports different colors for URLs, twitter style usernames and hashtags. By default the link text colors are set to userHandle RGB(71,90,109), hashtag RGB(151, 154, 158) and url/text links RGB(45, 113, 178). If there is no UIColor set on the highlighted  textColor properties, an alpha of 0.5 is applied to the set text color when a link is detected.
 
-To set your own text colors you can use the convenience initializer `init(with userHandleTextColor: UIColor, hashtagTextColor: UIColor, linkTextColor: UIColor)` or just set a different UIColor to to properties `textLinkTextColor`, `userHandleTextColor`, `hashtagTextColor` and `linkTextColor` after initializing `ContextLabel`.
+To set your own text colors you can use the convenience initializer `ContextLabel(with userHandleTextColor: UIColor, hashtagTextColor: UIColor, linkTextColor: UIColor)` or just set a different UIColor to to properties `textLinkTextColor`, `userHandleTextColor`, `hashtagTextColor` and `linkTextColor` after initializing `ContextLabel`.
 
 From version 0.3.0, text colors can be overwritten by implementing the folowing optional delegate methods:
 ``` Swift
@@ -22,6 +22,15 @@ func contextLabel(contextLabel: ContextLabel, linkTextColorFor linkRangeResult: 
 
 ## Underline style
 From version 0.3.0 you can also set the underline style through the properties `textLinkUnderlineStyle`, `userHandleUnderlineStyle`, `hashtagUnderlineStyle` and `linkUnderlineStyle`.
+
+## Text links
+ContextLabel automatically recognizes words starting with # and @ as well as manually defined text links.
+
+A text link is defined at the minimum by a string `”text link”` and an action which is a closure that gets called when the user touches the defined text. From version 0.3.1, all occurencies of a given text are recognized within the label text. To limit the recognition within the label text, an optional range can be set when initializing a TextLink.
+
+``` Swift
+TextLink(text: String, range: NSRange? = nil, options: NSStringCompareOptions = [], action: ()->())
+```
 
 ## Selection handling
 In order to get the selected string, range, detection type and textLink object you need to implement at least one of the following optional delegate methods, depending on when you want to get the selection:

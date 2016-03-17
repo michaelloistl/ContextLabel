@@ -73,8 +73,17 @@ public struct LinkRangeResult {
 }
 
 public struct TextLink {
-    var text: String
-    var action: ()->()
+    let text: String
+    let range: NSRange?
+    let options: NSStringCompareOptions
+    let action: ()->()
+        
+    init(text: String, range: NSRange? = nil, options: NSStringCompareOptions = [], action: ()->()) {
+        self.text = text
+        self.range = range
+        self.options = options
+        self.action = action
+    }
 }
 
 public class ContextLabel: UILabel, NSLayoutManagerDelegate {
@@ -518,16 +527,31 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
 
     // TEST: testGetRangesForTextLinksWithoutEmojis()
     // TEST: testGetRangesForTextLinksWithEmojis()
+    // TEST: testGetRangesForTextLinksWithMultipleOccuranciesWithoutRange()
+    // TEST: testGetRangesForTextLinksWithMultipleOccuranciesWithRange()
     func getRangesForTextLinks(textLinks: [TextLink]) -> [LinkRangeResult] {
         var rangesForLinkType = [LinkRangeResult]()
         
         for textLink in textLinks {
             let linkType = LinkDetectionType.TextLink
             let matchString = textLink.text
-            let matchRange = NSString(string: text).rangeOfString(matchString)
             
-            if matchRange.location < text.characters.count {
-                rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: textLink))
+            let range = textLink.range ?? NSMakeRange(0, text.characters.count)
+            var searchRange = range
+            var matchRange = NSRange()
+            while matchRange.location != NSNotFound  {
+                matchRange = NSString(string: text).rangeOfString(matchString, options: textLink.options, range: searchRange)
+                
+                if matchRange.location != NSNotFound && (matchRange.location + matchRange.length) <= (range.location + range.length) {
+                    rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: textLink))
+                    
+                    // Remaining searchRange
+                    let location = matchRange.location + matchRange.length
+                    let length = text.characters.count - location
+                    searchRange = NSMakeRange(location, length)
+                } else {
+                    break
+                }
             }
         }
         
