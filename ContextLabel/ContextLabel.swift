@@ -137,6 +137,18 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     public var hashtagUnderlineStyle: NSUnderlineStyle = .StyleNone
     public var linkUnderlineStyle: NSUnderlineStyle = .StyleNone
     
+    public var preferedHeight: CGFloat? {
+        didSet {
+            invalidateIntrinsicContentSize()
+        }
+    }
+    
+    public var preferedWidth: CGFloat? {
+        didSet {
+            invalidateIntrinsicContentSize()
+        }
+    }
+    
     // MARK: - Private Properties
     
     private var privateTextLinkHighlightedTextColor: UIColor {
@@ -309,6 +321,21 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
     
     // MARK: - Override Methods
+    
+    override public func intrinsicContentSize() -> CGSize {
+        var width = super.intrinsicContentSize().width
+        var height = super.intrinsicContentSize().height
+        
+        if let preferedWidth = preferedWidth {
+            width = preferedWidth
+        }
+        
+        if let preferedHeight = preferedHeight {
+            height = preferedHeight
+        }
+        
+        return CGSize(width: width, height: height)
+    }
     
     public override func layoutSubviews() {
         super.layoutSubviews()
