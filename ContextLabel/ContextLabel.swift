@@ -566,18 +566,20 @@ public class ContextLabel: UILabel, NSLayoutManagerDelegate {
             let range = textLink.range ?? NSMakeRange(0, text.characters.count)
             var searchRange = range
             var matchRange = NSRange()
-            while matchRange.location != NSNotFound  {
-                matchRange = NSString(string: text).rangeOfString(matchString, options: textLink.options, range: searchRange)
-                
-                if matchRange.location != NSNotFound && (matchRange.location + matchRange.length) <= (range.location + range.length) {
-                    rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: textLink))
+            if text.characters.count >= range.location + range.length {
+                while matchRange.location != NSNotFound  {
+                    matchRange = NSString(string: text).rangeOfString(matchString, options: textLink.options, range: searchRange)
                     
-                    // Remaining searchRange
-                    let location = matchRange.location + matchRange.length
-                    let length = text.characters.count - location
-                    searchRange = NSMakeRange(location, length)
-                } else {
-                    break
+                    if matchRange.location != NSNotFound && (matchRange.location + matchRange.length) <= (range.location + range.length) {
+                        rangesForLinkType.append(LinkRangeResult(linkDetectionType: linkType, linkRange: matchRange, linkString: matchString, textLink: textLink))
+                        
+                        // Remaining searchRange
+                        let location = matchRange.location + matchRange.length
+                        let length = text.characters.count - location
+                        searchRange = NSMakeRange(location, length)
+                    } else {
+                        break
+                    }
                 }
             }
         }
