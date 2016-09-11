@@ -73,12 +73,12 @@ public struct LinkRangeResult {
 }
 
 public struct TextLink {
-    let text: String
-    let range: NSRange?
-    let options: NSStringCompareOptions
-    let action: ()->()
+    public let text: String
+    public let range: NSRange?
+    public let options: NSStringCompareOptions
+    public let action: ()->()
         
-    init(text: String, range: NSRange? = nil, options: NSStringCompareOptions = [], action: ()->()) {
+    public init(text: String, range: NSRange? = nil, options: NSStringCompareOptions = [], action: ()->()) {
         self.text = text
         self.range = range
         self.options = options
