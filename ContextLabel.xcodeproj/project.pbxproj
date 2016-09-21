@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		6A17E9651BCD6D0F006296BE /* ContextLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A17E9641BCD6D0F006296BE /* ContextLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		6A17E96C1BCD6D0F006296BE /* ContextLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A17E9611BCD6D0F006296BE /* ContextLabel.framework */; settings = {ASSET_TAGS = (); }; };
+		6A17E96C1BCD6D0F006296BE /* ContextLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A17E9611BCD6D0F006296BE /* ContextLabel.framework */; };
 		6A17E9711BCD6D0F006296BE /* ContextLabelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A17E9701BCD6D0F006296BE /* ContextLabelTests.swift */; };
-		6AE5CE471BCD757E00B517B1 /* ContextLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE5CE461BCD757E00B517B1 /* ContextLabel.swift */; settings = {ASSET_TAGS = (); }; };
+		6AE5CE471BCD757E00B517B1 /* ContextLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE5CE461BCD757E00B517B1 /* ContextLabel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -159,9 +159,11 @@
 				TargetAttributes = {
 					6A17E9601BCD6D0F006296BE = {
 						CreatedOnToolsVersion = 7.0.1;
+						LastSwiftMigration = 0800;
 					};
 					6A17E96A1BCD6D0F006296BE = {
 						CreatedOnToolsVersion = 7.0.1;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -332,6 +334,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -349,6 +352,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.aplo.ContextLabel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -359,6 +363,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aplo.ContextLabelTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -369,6 +374,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aplo.ContextLabelTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
