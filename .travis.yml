@@ -6,7 +6,7 @@ language: objective-c
 osx_image: xcode8
 xcode_project: ContextLabel.xcodeproj
 xcode_scheme: ContextLabel
-xcode_sdk: iphonesimulator10.0
+# xcode_sdk: iphonesimulator10.0
 
 script:
 - xctool test -project ContextLabel.xcodeproj -scheme ContextLabel -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO
