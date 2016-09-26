@@ -21,7 +21,7 @@ class ContextLabelTests: XCTestCase {
         super.tearDown()
     }
     
-    func testGetRangesForTextLinksWithoutEmojis() {
+    func testLinkResultsForTextLinksWithoutEmojis() {
         let textLink1 = TextLink(text: "link1", action: { })
         let textLink2 = TextLink(text: "link2", action: { })
         let textLink3 = TextLink(text: "link3", action: { })
@@ -31,26 +31,26 @@ class ContextLabelTests: XCTestCase {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "Testing link1 and link2 without emojis"
         
-        let linkRangeResults = contextLabel.getRangesForTextLinks(textLinks)
+        let linkResults = contextLabel.linkResultsForTextLinks(textLinks)
         
-        XCTAssertEqual(linkRangeResults.count, 2)
+        XCTAssertEqual(linkResults.count, 2)
         
-        let linkRangeResult1 = linkRangeResults[0]
-        XCTAssertEqual(linkRangeResult1.linkString, "link1")
-        XCTAssertNotNil(linkRangeResult1.textLink)
-        XCTAssertEqual(linkRangeResult1.textLink?.text, "link1")
-        XCTAssertEqual(linkRangeResult1.linkRange.location, 8)
-        XCTAssertEqual(linkRangeResult1.linkRange.length, 5)
+        let linkResult1 = linkResults[0]
+        XCTAssertEqual(linkResult1.text, "link1")
+        XCTAssertNotNil(linkResult1.textLink)
+        XCTAssertEqual(linkResult1.textLink?.text, "link1")
+        XCTAssertEqual(linkResult1.range.location, 8)
+        XCTAssertEqual(linkResult1.range.length, 5)
         
-        let linkRangeResult2 = linkRangeResults[1]
-        XCTAssertEqual(linkRangeResult2.linkString, "link2")
-        XCTAssertNotNil(linkRangeResult2.textLink)
-        XCTAssertEqual(linkRangeResult2.textLink?.text, "link2")
-        XCTAssertEqual(linkRangeResult2.linkRange.location, 18)
-        XCTAssertEqual(linkRangeResult2.linkRange.length, 5)
+        let linkResult2 = linkResults[1]
+        XCTAssertEqual(linkResult2.text, "link2")
+        XCTAssertNotNil(linkResult2.textLink)
+        XCTAssertEqual(linkResult2.textLink?.text, "link2")
+        XCTAssertEqual(linkResult2.range.location, 18)
+        XCTAssertEqual(linkResult2.range.length, 5)
     }
     
-    func testGetRangesForTextLinksWithEmojis() {
+    func testLinkResultsForTextLinksWithEmojis() {
         let textLink1 = TextLink(text: "link😊", action: { })
         let textLink2 = TextLink(text: "link2", action: { })
         let textLink3 = TextLink(text: "link3", action: { })
@@ -60,105 +60,105 @@ class ContextLabelTests: XCTestCase {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "Testing ☕️🍪 link😊 and ☕️🍪 link2 with emojis 👍"
         
-        let linkRangeResults = contextLabel.getRangesForTextLinks(textLinks)
+        let linkResults = contextLabel.linkResultsForTextLinks(textLinks)
         
-        XCTAssertEqual(linkRangeResults.count, 2)
+        XCTAssertEqual(linkResults.count, 2)
         
-        let linkRangeResult1 = linkRangeResults[0]
-        XCTAssertEqual(linkRangeResult1.linkString, "link😊")
-        XCTAssertNotNil(linkRangeResult1.textLink)
-        XCTAssertEqual(linkRangeResult1.textLink?.text, "link😊")
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult1.linkRange), "link😊")
+        let linkResult1 = linkResults[0]
+        XCTAssertEqual(linkResult1.text, "link😊")
+        XCTAssertNotNil(linkResult1.textLink)
+        XCTAssertEqual(linkResult1.textLink?.text, "link😊")
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult1.range), "link😊")
         
-        let linkRangeResult2 = linkRangeResults[1]
-        XCTAssertEqual(linkRangeResult2.linkString, "link2")
-        XCTAssertNotNil(linkRangeResult2.textLink)
-        XCTAssertEqual(linkRangeResult2.textLink?.text, "link2")
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult2.linkRange), "link2")
+        let linkResult2 = linkResults[1]
+        XCTAssertEqual(linkResult2.text, "link2")
+        XCTAssertNotNil(linkResult2.textLink)
+        XCTAssertEqual(linkResult2.textLink?.text, "link2")
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult2.range), "link2")
     }
     
-    func testGetRangesForUserHandlesInTextWithoutEmojis() {
+    func testLinkResultsForUserHandlesWithoutEmojis() {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "Testing #tag1 @user1 #and @user2 #tag4 # @ @@user @#user without emojis"
         
-        let linkRangeResults = contextLabel.getRangesForUserHandlesInText(contextLabel.text)
+        let linkResults = contextLabel.linkResultsForUserHandles(inString: contextLabel.text)
         
-        XCTAssertEqual(linkRangeResults.count, 2)
+        XCTAssertEqual(linkResults.count, 2)
         
-        let linkRangeResult1 = linkRangeResults[0]
-        XCTAssertEqual(linkRangeResult1.linkString, "@user1")
-        XCTAssertNil(linkRangeResult1.textLink)
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult1.linkRange), "@user1")
+        let linkResult1 = linkResults[0]
+        XCTAssertEqual(linkResult1.text, "@user1")
+        XCTAssertNil(linkResult1.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult1.range), "@user1")
         
-        let linkRangeResult2 = linkRangeResults[1]
-        XCTAssertEqual(linkRangeResult2.linkString, "@user2")
-        XCTAssertNil(linkRangeResult2.textLink)
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult2.linkRange), "@user2")
+        let linkResult2 = linkResults[1]
+        XCTAssertEqual(linkResult2.text, "@user2")
+        XCTAssertNil(linkResult2.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult2.range), "@user2")
     }
     
-    func testGetRangesForUserHandlesInTextWithEmojis() {
+    func testLinkResultsForUserHandlesWithEmojis() {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "Testing ☕️🍪 #tag1 ☕️🍪 @user1😊 #and @user2☕️emoji #tag4 # @ @@user @#user with emojis 👍"
         
-        let linkRangeResults = contextLabel.getRangesForUserHandlesInText(contextLabel.text)
+        let linkResults = contextLabel.linkResultsForUserHandles(inString: contextLabel.text)
         
-        XCTAssertEqual(linkRangeResults.count, 2)
+        XCTAssertEqual(linkResults.count, 2)
         
-        let linkRangeResult1 = linkRangeResults[0]
-        XCTAssertEqual(linkRangeResult1.linkString, "@user1")
-        XCTAssertNil(linkRangeResult1.textLink)
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult1.linkRange), "@user1")
+        let linkResult1 = linkResults[0]
+        XCTAssertEqual(linkResult1.text, "@user1")
+        XCTAssertNil(linkResult1.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult1.range), "@user1")
         
-        let linkRangeResult2 = linkRangeResults[1]
-        XCTAssertEqual(linkRangeResult2.linkString, "@user2")
-        XCTAssertNil(linkRangeResult2.textLink)
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult2.linkRange), "@user2")
+        let linkResult2 = linkResults[1]
+        XCTAssertEqual(linkResult2.text, "@user2")
+        XCTAssertNil(linkResult2.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult2.range), "@user2")
     }
     
-    func testGetRangesForHashtagsInTextWithoutEmojis() {
+    func testLinkResultsForHashtagsWithoutEmojis() {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "Testing #tag1 @and #tag2 @user # @ @@user @#tag without emojis"
         
-        let linkRangeResults = contextLabel.getRangesForHashtagsInText(contextLabel.text)
+        let linkResults = contextLabel.linkResultsForHashtags(inString: contextLabel.text)
         
-        XCTAssertEqual(linkRangeResults.count, 2)
+        XCTAssertEqual(linkResults.count, 2)
         
-        let linkRangeResult1 = linkRangeResults[0]
-        XCTAssertEqual(linkRangeResult1.linkString, "#tag1")
-        XCTAssertNil(linkRangeResult1.textLink)
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult1.linkRange), "#tag1")
+        let linkResult1 = linkResults[0]
+        XCTAssertEqual(linkResult1.text, "#tag1")
+        XCTAssertNil(linkResult1.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult1.range), "#tag1")
         
-        let linkRangeResult2 = linkRangeResults[1]
-        XCTAssertEqual(linkRangeResult2.linkString, "#tag2")
-        XCTAssertNil(linkRangeResult2.textLink)
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult2.linkRange), "#tag2")
+        let linkResult2 = linkResults[1]
+        XCTAssertEqual(linkResult2.text, "#tag2")
+        XCTAssertNil(linkResult2.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult2.range), "#tag2")
     }
 
-    func testGetRangesForHashtagsInTextWithEmojis() {
+    func testLinkResultsForHashtagsWithEmojis() {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "Testing ☕️🍪 #tag1 ☕️🍪 @and #tag2😊 @user #tag3☕️emoji # @ @@user @#tag with emojis 👍"
         
-        let linkRangeResults = contextLabel.getRangesForHashtagsInText(contextLabel.text)
+        let linkResults = contextLabel.linkResultsForHashtags(inString: contextLabel.text)
         
-        XCTAssertEqual(linkRangeResults.count, 3)
+        XCTAssertEqual(linkResults.count, 3)
         
-        let linkRangeResult1 = linkRangeResults[0]
-        XCTAssertEqual(linkRangeResult1.linkString, "#tag1")
-        XCTAssertNil(linkRangeResult1.textLink)
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult1.linkRange), "#tag1")
+        let linkResult1 = linkResults[0]
+        XCTAssertEqual(linkResult1.text, "#tag1")
+        XCTAssertNil(linkResult1.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult1.range), "#tag1")
         
-        let linkRangeResult2 = linkRangeResults[1]
-        XCTAssertEqual(linkRangeResult2.linkString, "#tag2")
-        XCTAssertNil(linkRangeResult2.textLink)
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult2.linkRange), "#tag2")
+        let linkResult2 = linkResults[1]
+        XCTAssertEqual(linkResult2.text, "#tag2")
+        XCTAssertNil(linkResult2.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult2.range), "#tag2")
         
-        let linkRangeResult3 = linkRangeResults[2]
-        XCTAssertEqual(linkRangeResult3.linkString, "#tag3")
-        XCTAssertNil(linkRangeResult3.textLink)
-        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkRangeResult3.linkRange), "#tag3")
+        let linkResult3 = linkResults[2]
+        XCTAssertEqual(linkResult3.text, "#tag3")
+        XCTAssertNil(linkResult3.textLink)
+        XCTAssertEqual(NSString(string: contextLabel.text).substring(with: linkResult3.range), "#tag3")
     }
     
-    func testGetRangesForTextLinksWithMultipleOccuranciesWithoutRange() {
+    func testLinkResultsForTextLinksWithMultipleOccuranciesWithoutRange() {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "one two three one two three one two one"
         
@@ -166,18 +166,18 @@ class ContextLabelTests: XCTestCase {
         let twoTextLink = TextLink(text: "two", range: nil) { }
         let threeTextLink = TextLink(text: "three", range: nil) { }
         
-        let oneLinkRangeResults = contextLabel.getRangesForTextLinks([oneTextLink])
-        let twoLinkRangeResults = contextLabel.getRangesForTextLinks([twoTextLink])
-        let threeLinkRangeResults = contextLabel.getRangesForTextLinks([threeTextLink])
-        let linkRangeResults = contextLabel.getRangesForTextLinks([oneTextLink, twoTextLink, threeTextLink])
+        let oneLinkResults = contextLabel.linkResultsForTextLinks([oneTextLink])
+        let twoLinkResults = contextLabel.linkResultsForTextLinks([twoTextLink])
+        let threeLinkResults = contextLabel.linkResultsForTextLinks([threeTextLink])
+        let linkResults = contextLabel.linkResultsForTextLinks([oneTextLink, twoTextLink, threeTextLink])
         
-        XCTAssertEqual(oneLinkRangeResults.count, 4)
-        XCTAssertEqual(twoLinkRangeResults.count, 3)
-        XCTAssertEqual(threeLinkRangeResults.count, 2)
-        XCTAssertEqual(linkRangeResults.count, 4+3+2)
+        XCTAssertEqual(oneLinkResults.count, 4)
+        XCTAssertEqual(twoLinkResults.count, 3)
+        XCTAssertEqual(threeLinkResults.count, 2)
+        XCTAssertEqual(linkResults.count, 4+3+2)
     }
     
-    func testGetRangesForTextLinksWithMultipleOccuranciesWithRange() {
+    func testLinkResultsForTextLinksWithMultipleOccuranciesWithRange() {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "one two three one two three one two one"
         
@@ -187,15 +187,15 @@ class ContextLabelTests: XCTestCase {
         let twoTextLink = TextLink(text: "two", range: range) { }
         let threeTextLink = TextLink(text: "three", range: range) { }
         
-        let oneLinkRangeResults = contextLabel.getRangesForTextLinks([oneTextLink])
-        let twoLinkRangeResults = contextLabel.getRangesForTextLinks([twoTextLink])
-        let threeLinkRangeResults = contextLabel.getRangesForTextLinks([threeTextLink])
-        let linkRangeResults = contextLabel.getRangesForTextLinks([oneTextLink, twoTextLink, threeTextLink])
+        let oneLinkResults = contextLabel.linkResultsForTextLinks([oneTextLink])
+        let twoLinkResults = contextLabel.linkResultsForTextLinks([twoTextLink])
+        let threeLinkResults = contextLabel.linkResultsForTextLinks([threeTextLink])
+        let linkResults = contextLabel.linkResultsForTextLinks([oneTextLink, twoTextLink, threeTextLink])
         
-        XCTAssertEqual(oneLinkRangeResults.count, 1)
-        XCTAssertEqual(twoLinkRangeResults.count, 1)
-        XCTAssertEqual(threeLinkRangeResults.count, 1)
-        XCTAssertEqual(linkRangeResults.count, 1+1+1)
+        XCTAssertEqual(oneLinkResults.count, 1)
+        XCTAssertEqual(twoLinkResults.count, 1)
+        XCTAssertEqual(threeLinkResults.count, 1)
+        XCTAssertEqual(linkResults.count, 1+1+1)
     }
      
 }
