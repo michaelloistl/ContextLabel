@@ -151,7 +151,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
 
     // MARK: - Properties
     
-    public var didTouch: (TouchResult) -> () = { _ in }
+    public var didTouch: (TouchResult) -> Void = { _ in }
     
     // Automatic detection of links, hashtags and usernames. When this is enabled links
     // are coloured using the textColor property above
@@ -274,7 +274,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         setup()
     }
     
-    public convenience init(frame: CGRect, didTouch: @escaping (TouchResult) -> ()) {
+    public convenience init(frame: CGRect, didTouch: @escaping (TouchResult) -> Void) {
         self.init(frame: frame)
         
         self.didTouch = didTouch
@@ -415,7 +415,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         // Color attributes
         var color = self.textColor
         if self.isEnabled == false {
-            color = UIColor.lightGray
+            color = .lightGray
         } else if self.isHighlighted {
             if self.highlightedTextColor != nil {
                 color = self.highlightedTextColor!
