@@ -74,21 +74,12 @@ public struct TextLink {
 
 open class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
-    public struct LinkDetectionType : OptionSet {
-        public typealias RawValue = UInt
-        fileprivate var value: UInt = 0
-        init(_ value: UInt) { self.value = value }
-        public init(rawValue value: UInt) { self.value = value }
-        init(nilLiteral: ()) { self.value = 0 }
-        static var allZeros: LinkDetectionType { return self.init(0) }
-        static func fromMask(_ raw: UInt) -> LinkDetectionType { return self.init(raw) }
-        public var rawValue: UInt { return self.value }
-        
-        static var None: LinkDetectionType { return self.init(0) }
-        static var UserHandle: LinkDetectionType { return LinkDetectionType(1 << 0) }
-        static var Hashtag: LinkDetectionType { return LinkDetectionType(1 << 1) }
-        static var URL: LinkDetectionType { return LinkDetectionType(1 << 2) }
-        static var TextLink: LinkDetectionType { return LinkDetectionType(1 << 3) }
+    public enum LinkDetectionType {
+        case none
+        case userHandle
+        case hashtag
+        case url
+        case textLink
     }
   
     let hashtagRegex = "(?<=\\s|^)#(\\w*[A-Za-z&_-]+\\w*)"
@@ -162,7 +153,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     // linkDetectionTypes
-    public var linkDetectionTypes: LinkDetectionType = [.UserHandle, .Hashtag, .URL, .TextLink] {
+    public var linkDetectionTypes: [LinkDetectionType] = [.userHandle, .hashtag, .url, .textLink] {
         didSet {
             setContextLabelDataWithText(nil)
         }
@@ -486,15 +477,15 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
             linkResults += linkResultsForTextLinks(textLinks)
         }
         
-        if linkDetectionTypes.intersection(.UserHandle) != [] {
+        if linkDetectionTypes.contains(.userHandle) {
             linkResults += linkResultsForUserHandles(inString: attributedString.string)
         }
 
-        if linkDetectionTypes.intersection(.Hashtag) != [] {
+        if linkDetectionTypes.contains(.hashtag) {
             linkResults += linkResultsForHashtags(inString: attributedString.string)
         }
 
-        if linkDetectionTypes.intersection(.URL) != [] {
+        if linkDetectionTypes.contains(.url) {
             linkResults += linkResultsForURLs(inAttributedString: attributedString)
         }
 
@@ -509,7 +500,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         var linkResults = [LinkResult]()
         
         for textLink in textLinks {
-            let linkType = LinkDetectionType.TextLink
+            let linkType = LinkDetectionType.textLink
             let matchString = textLink.text
             
             let range = textLink.range ?? NSMakeRange(0, text.characters.count)
@@ -539,13 +530,13 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
     // TEST: testLinkResultsForUserHandlesWithoutEmojis()
     // TEST: testLinkResultsForUserHandlesWithEmojis()
     internal func linkResultsForUserHandles(inString string: String) -> [LinkResult] {
-        return linkResults(for: .UserHandle, regexPattern: userHandleRegex, string: string)
+        return linkResults(for: .userHandle, regexPattern: userHandleRegex, string: string)
     }
 
     // TEST: testLinkResultsForHashtagsWithoutEmojis()
     // TEST: testLinkResultsForHashtagsWithEmojis()
     internal func linkResultsForHashtags(inString string: String) -> [LinkResult] {
-        return linkResults(for: .Hashtag, regexPattern: hashtagRegex, string: string)
+        return linkResults(for: .hashtag, regexPattern: hashtagRegex, string: string)
     }
 
     fileprivate func linkResults(for linkType: LinkDetectionType, regexPattern: String, string: String) -> [LinkResult] {
@@ -607,7 +598,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
                 
                 if match.resultType == .link {
                     if let matchString = realURL as? String {
-                        linkResults.append(LinkResult(detectionType: LinkDetectionType.URL, range: matchRange, text: matchString, textLink: nil))
+                        linkResults.append(LinkResult(detectionType: .url, range: matchRange, text: matchString, textLink: nil))
                     }
                 }
             }
