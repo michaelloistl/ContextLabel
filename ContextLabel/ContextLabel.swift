@@ -81,6 +81,23 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         case url
         case textLink
     }
+    
+//    public struct LinkDetectionType : OptionSet {
+//        public typealias RawValue = UInt
+//        fileprivate var value: UInt = 0
+//        init(_ value: UInt) { self.value = value }
+//        public init(rawValue value: UInt) { self.value = value }
+//        init(nilLiteral: ()) { self.value = 0 }
+//        static var allZeros: LinkDetectionType { return self.init(0) }
+//        static func fromMask(_ raw: UInt) -> LinkDetectionType { return self.init(raw) }
+//        public var rawValue: UInt { return self.value }
+//        
+//        static var none: LinkDetectionType { return self.init(0) }
+//        static var userHandle: LinkDetectionType { return LinkDetectionType(1 << 0) }
+//        static var hashtag: LinkDetectionType { return LinkDetectionType(1 << 1) }
+//        static var url: LinkDetectionType { return LinkDetectionType(1 << 2) }
+//        static var textLink: LinkDetectionType { return LinkDetectionType(1 << 3) }
+//    }
   
     let hashtagRegex = "(?<=\\s|^)#(\\w*[A-Za-z&_-]+\\w*)"
     let userHandleRegex = "(?<=\\s|^)@(\\w*[A-Za-z&_-]+\\w*)"
@@ -92,21 +109,23 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
     public var lineHeightMultiple: CGFloat?
     
     // TextColors
-    
-    public var textLinkTextColor: (LinkResult) -> (textColor: UIColor, highlightedTextColor: UIColor?) = { _ in
-        return (UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0), nil)
+    public var foregroundColor: (LinkResult) -> UIColor = { (linkResult) in
+        switch linkResult.detectionType {
+        case .userHandle:
+            return UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
+        case .hashtag:
+            return UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
+        case .url:
+            return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+        case .textLink:
+            return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+        default:
+            return .black
+        }
     }
     
-    public var userHandleTextColor: (LinkResult) -> (textColor: UIColor, highlightedTextColor: UIColor?) = { _ in
-        return (UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0), nil)
-    }
-    
-    public var hashtagTextColor: (LinkResult) -> (textColor: UIColor, highlightedTextColor: UIColor?) = { _ in
-        return (UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0), nil)
-    }
-    
-    public var linkTextColor: (LinkResult) -> (textColor: UIColor, highlightedTextColor: UIColor?) = { _ in
-        return (UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0), nil)
+    public var foregroundHighlightedColor: (LinkResult) -> UIColor? = { (linkResult) in
+        return nil
     }
     
     // UnderlineStyle
@@ -611,39 +630,12 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
         
         for linkResult in linkResults {
-            var attributes: [String: AnyObject]?
+            let textColor = foregroundColor(linkResult)
+            let highlightedTextColor = foregroundHighlightedColor(linkResult)
+            let color = (highlighted) ? highlightedTextColor ?? self.highlightedTextColor(textColor) : textColor
+            let attributes = attributesWithTextColor(color, underlineStyle: textLinkUnderlineStyle(linkResult))
             
-            if linkResult.detectionType == .TextLink {
-                let textColors = textLinkTextColor(linkResult)
-                let color = (highlighted) ? textColors.highlightedTextColor ?? highlightedTextColor(textColors.textColor) : textColors.textColor
-                
-                attributes = attributesWithTextColor(color, underlineStyle: textLinkUnderlineStyle(linkResult))
-            }
-            
-            if linkResult.detectionType == .UserHandle {
-                let textColors = userHandleTextColor(linkResult)
-                let color = (highlighted) ? textColors.highlightedTextColor ?? highlightedTextColor(textColors.textColor) : textColors.textColor
-                
-                attributes = attributesWithTextColor(color, underlineStyle: userHandleUnderlineStyle(linkResult))
-            }
-            
-            if linkResult.detectionType == .Hashtag {
-                let textColors = hashtagTextColor(linkResult)
-                let color = (highlighted) ? textColors.highlightedTextColor ?? highlightedTextColor(textColors.textColor) : textColors.textColor
-                
-                attributes = attributesWithTextColor(color, underlineStyle: hashtagUnderlineStyle(linkResult))
-            }
-            
-            if linkResult.detectionType == .URL {
-                let textColors = textLinkTextColor(linkResult)
-                let color = (highlighted) ? textColors.highlightedTextColor ?? highlightedTextColor(textColors.textColor) : textColors.textColor
-                
-                attributes = attributesWithTextColor(color, underlineStyle: linkUnderlineStyle(linkResult))
-            }
-            
-            if let attributes = attributes {
-                mutableAttributedString.setAttributes(attributes, range: linkResult.range)
-            }
+            mutableAttributedString.setAttributes(attributes, range: linkResult.range)
         }
         
         return mutableAttributedString
