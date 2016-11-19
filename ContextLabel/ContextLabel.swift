@@ -81,23 +81,6 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         case url
         case textLink
     }
-    
-//    public struct LinkDetectionType : OptionSet {
-//        public typealias RawValue = UInt
-//        fileprivate var value: UInt = 0
-//        init(_ value: UInt) { self.value = value }
-//        public init(rawValue value: UInt) { self.value = value }
-//        init(nilLiteral: ()) { self.value = 0 }
-//        static var allZeros: LinkDetectionType { return self.init(0) }
-//        static func fromMask(_ raw: UInt) -> LinkDetectionType { return self.init(raw) }
-//        public var rawValue: UInt { return self.value }
-//        
-//        static var none: LinkDetectionType { return self.init(0) }
-//        static var userHandle: LinkDetectionType { return LinkDetectionType(1 << 0) }
-//        static var hashtag: LinkDetectionType { return LinkDetectionType(1 << 1) }
-//        static var url: LinkDetectionType { return LinkDetectionType(1 << 2) }
-//        static var textLink: LinkDetectionType { return LinkDetectionType(1 << 3) }
-//    }
   
     let hashtagRegex = "(?<=\\s|^)#(\\w*[A-Za-z&_-]+\\w*)"
     let userHandleRegex = "(?<=\\s|^)@(\\w*[A-Za-z&_-]+\\w*)"
