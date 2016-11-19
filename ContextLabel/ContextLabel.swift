@@ -113,19 +113,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
     // UnderlineStyle
     
-    public var textLinkUnderlineStyle: (LinkResult) -> (NSUnderlineStyle) = { _ in
-        return .styleNone
-    }
-    
-    public var userHandleUnderlineStyle: (LinkResult) -> (NSUnderlineStyle) = { _ in
-        return .styleNone
-    }
-    
-    public var hashtagUnderlineStyle: (LinkResult) -> (NSUnderlineStyle) = { _ in
-        return .styleNone
-    }
-    
-    public var linkUnderlineStyle: (LinkResult) -> (NSUnderlineStyle) = { _ in
+    public var underlineStyle: (LinkResult) -> (NSUnderlineStyle) = { _ in
         return .styleNone
     }
     
@@ -616,7 +604,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
             let textColor = foregroundColor(linkResult)
             let highlightedTextColor = foregroundHighlightedColor(linkResult)
             let color = (highlighted) ? highlightedTextColor ?? self.highlightedTextColor(textColor) : textColor
-            let attributes = attributesWithTextColor(color, underlineStyle: textLinkUnderlineStyle(linkResult))
+            let attributes = attributesWithTextColor(color, underlineStyle: self.underlineStyle(linkResult))
             
             mutableAttributedString.setAttributes(attributes, range: linkResult.range)
         }
