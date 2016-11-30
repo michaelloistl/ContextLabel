@@ -541,8 +541,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         }
 
         // Run the expression and get matches
-        let length: Int = text.characters.count
-        if let matches = regex?.matches(in: text, options: .reportCompletion, range: NSMakeRange(0, length)) {
+        let nsString = text as NSString
+        if let matches = regex?.matches(in: text, options: .reportCompletion, range: NSMakeRange(0, nsString.length)) {
 
             // Add all our ranges to the result
             for match in matches {
