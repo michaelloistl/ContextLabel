@@ -72,7 +72,7 @@ public struct TextLink {
     }
 }
 
-open class ContextLabel: UILabel, NSLayoutManagerDelegate {
+open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDelegate {
     
     public enum LinkDetectionType {
         case none
@@ -118,6 +118,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
     }
     
     // Autolayout
+    
     open var preferedHeight: CGFloat? {
         didSet {
             invalidateIntrinsicContentSize()
@@ -130,9 +131,18 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         }
     }
 
+    // Copy
+    
+    public var canCopy: Bool = false {
+        didSet {
+            longPressGestureRecognizer.isEnabled = canCopy
+        }
+    }
+    
     // MARK: - Properties
     
     public var didTouch: (TouchResult) -> Void = { _ in }
+    public var didCopy: (String!) -> Void = { _ in }
     
     // Automatic detection of links, hashtags and usernames. When this is enabled links
     // are coloured using the textColor property above
@@ -185,6 +195,12 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
             }
         }
     }
+    
+    public lazy var longPressGestureRecognizer: UILongPressGestureRecognizer = {
+        let _recognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressGestureRecognized(_:)))
+        _recognizer.delegate = self
+        return _recognizer
+    }()
     
     // Specifies the space in which to render text
     fileprivate lazy var textContainer: NSTextContainer = {
@@ -262,7 +278,23 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         setup()
     }
     
+    // MARK: - Override Properties
+    
+    open override var canBecomeFirstResponder: Bool {
+        return canCopy
+    }
+    
+    
     // MARK: - Override Methods
+
+    open override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        return action == #selector(copy(_:)) && canCopy
+    }
+    
+    open override func copy(_ sender: Any?) {
+        UIPasteboard.general.string = text
+        didCopy(text)
+    }
     
     open override var intrinsicContentSize : CGSize {
         var width = super.intrinsicContentSize.width
@@ -294,7 +326,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
         }
         
         addLinkAttributesToLinkResult(withTouches: touches, highlighted: true)
-        
+
         super.touchesBegan(touches, with: event)
     }
     
@@ -457,6 +489,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
 
         // Establish the text store with our current text
         setContextLabelDataWithText(nil)
+        addGestureRecognizer(longPressGestureRecognizer)
     }
     
     // Returns array of link results for all special words, user handles, hashtags and urls
@@ -654,6 +687,24 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate {
     
     fileprivate func highlightedTextColor(_ textColor: UIColor) -> UIColor {
         return textColor.withAlphaComponent(0.5)
+    }
+    
+    // MARK: Actions
+    
+    func longPressGestureRecognized(_ sender: UILongPressGestureRecognizer) {
+        if let superview = superview, canCopy, sender.state == .began {
+            becomeFirstResponder()
+            let menu = UIMenuController.shared
+            menu.setTargetRect(frame, in: superview)
+            menu.setMenuVisible(true, animated: true)
+        }
+    }
+}
+
+extension ContextLabel {
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
     }
 }
 
