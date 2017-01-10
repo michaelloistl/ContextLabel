@@ -482,10 +482,10 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         lineBreakMode = .byTruncatingTail
         
         // Attach the layou manager to the container and storage
-        self.textContainer.layoutManager = self.layoutManager
+        textContainer.layoutManager = self.layoutManager
 
         // Make sure user interaction is enabled so we can accept touches
-        self.isUserInteractionEnabled = true
+        isUserInteractionEnabled = true
 
         // Establish the text store with our current text
         setContextLabelDataWithText(nil)
