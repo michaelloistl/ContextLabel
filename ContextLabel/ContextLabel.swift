@@ -464,14 +464,14 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         return attributes as [String : AnyObject]
     }
     
-    fileprivate func attributesWithTextColor(_ textColor: UIColor) -> [String: AnyObject] {
+    fileprivate func attributesWithTextColor(_ textColor: UIColor) -> [String: Any] {
         var attributes = attributesFromProperties()
         attributes[NSForegroundColorAttributeName] = textColor
         
         return attributes
     }
     
-    fileprivate func attributesWithTextColor(_ textColor: UIColor, underlineStyle: NSUnderlineStyle) -> [String: AnyObject] {
+    fileprivate func attributesWithTextColor(_ textColor: UIColor, underlineStyle: NSUnderlineStyle) -> [String: Any] {
         var attributes = attributesWithTextColor(textColor)
         attributes[NSUnderlineStyleAttributeName] = underlineStyle.rawValue as AnyObject?
         
