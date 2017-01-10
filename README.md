@@ -8,20 +8,47 @@ A simple to use drop in replacement for UILabel written in Swift that provides a
 ContextLabel doesn't have any special dependencies so just include the files ContextLabel.swift in your project. Then use the `ContextLabel` class in replacement for `UILabel`.
 
 ## Text colors
-ContextLabel supports different colors for URLs, twitter style usernames and hashtags. By default the link text colors are set to userHandle RGB(71,90,109), hashtag RGB(151, 154, 158) and url/text links RGB(45, 113, 178). If there is no UIColor set on the highlighted  textColor properties, an alpha of 0.5 is applied to the set text color when a link is detected.
+ContextLabel supports different colors for URLs, twitter style usernames and hashtags. By default the link text colors are set to userHandle RGB(71,90,109), hashtag RGB(151, 154, 158) and url/text links RGB(45, 113, 178).
 
-To set your own text colors you can use the convenience initializer `ContextLabel(with userHandleTextColor: UIColor, hashtagTextColor: UIColor, linkTextColor: UIColor)` or just set a different UIColor to to properties `textLinkTextColor`, `userHandleTextColor`, `hashtagTextColor` and `linkTextColor` after initializing `ContextLabel`.
+To set your own text colors, return the desired UIColor within the closure value of `foregroundColor`:
 
-From version 0.3.0, text colors can be overwritten by implementing the folowing optional delegate methods:
 ``` Swift
-func contextLabel(contextLabel: ContextLabel, textLinkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
-func contextLabel(contextLabel: ContextLabel, userHandleTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
-func contextLabel(contextLabel: ContextLabel, hashtagTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
-func contextLabel(contextLabel: ContextLabel, linkTextColorFor linkRangeResult: LinkRangeResult) -> UIColor?
+contextLabel.foregroundColor = { (linkResult) in
+		switch linkResult.detectionType {
+    case .userHandle:
+        return UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
+    case .hashtag:
+        return UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
+    case .url:
+        return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+    case .textLink:
+        return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+    default:
+        return .black
+    }
+}
+```
+
+If there is no UIColor returned from `foregroundHighlightedColor`, an alpha of 0.5 is applied to the set text color when a link is detected.
+
+To set your own text highlight colors, return the desired UIColor within the closure value of `underlineStyle`:
+
+``` Swift
+contextLabel.foregroundHighlightedColor = { (linkResult) in
+    return .lightGray
+}
 ```
 
 ## Underline style
-From version 0.3.0 you can also set the underline style through the properties `textLinkUnderlineStyle`, `userHandleUnderlineStyle`, `hashtagUnderlineStyle` and `linkUnderlineStyle`.
+By default detected links are not underlined.
+
+To set your own underline style, return the desired NSUnderlineStyle within the closure value of `underlineStyle`:
+
+``` Swift
+contextLabel.underlineStyle = { (linkResult) in
+    return .styleNone
+}
+```
 
 ## Text links
 ContextLabel automatically recognizes words starting with # and @ as well as manually defined text links.
@@ -29,66 +56,52 @@ ContextLabel automatically recognizes words starting with # and @ as well as man
 A text link is defined at the minimum by a string `”text link”` and an action which is a closure that gets called when the user touches the defined text. From version 0.3.1, all occurencies of a given text are recognized within the label text. To limit the recognition within the label text, an optional range can be set when initializing a TextLink.
 
 ``` Swift
-TextLink(text: String, range: NSRange? = nil, options: NSStringCompareOptions = [], action: ()->())
+TextLink(text: String, range: NSRange? = nil, options: NSString.CompareOptions = [], action: @escaping ()->())
 ```
 
 ## Selection handling
-In order to get the selected string, range, detection type and textLink object you need to implement at least one of the following optional delegate methods, depending on when you want to get the selection:
-``` Swift
-func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult)
-func contextLabel(contextLabel: ContextLabel, movedTouchTo text: String, with linkRangeResult: LinkRangeResult)
-func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: LinkRangeResult)
-```
-
-## LinkRangeResult
-Each delegate method includes a `LinkRangeResult` struct which includes
-- linkDetectionType: LinkDetectionType
-- linkRange: NSRange
-- linkString: String
-- textLink: TextLink?
-
-## Sample code
-
-### Replacement for UILabel
-``` swift
-let contextLabel = ContextLabel(frame: CGRectMake(0, 0, 320, 100))
-contextLabel.text = "ContextLabel is a Swift drop-in replacement for UILabel that supports selectable @UserHandle, #Hashtags and links https://github.com/michaelloistl/ContextLabel"
-contextLabel.delegate = self
-
-view.addSubview(contextLabel)
-```
-
-### Use in UITableViewCell
-
-Add instance variable to capture state when user touches text in label:
+When tapping on a userHandle, hashtag or url/text link the closure `didTouch: (TouchResult) -> Void` will be called for each touch state:
 
 ``` Swift
-var contextLabelTouched = false
-```
-
-In a tableViewCell you need to overwrite `touchesBegan: withEvent:`
-
-``` Swift
-override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-    if contextLabelTouched == false {
-        super.touchesBegan(touches, withEvent: event)
+didTouch: { [weak self] (touchResult) in
+    switch touchResult.state {
+    case .began:
+        // Do something
+    case .ended:
+				// Do something
+    default:
+        break
     }
 }
 ```
 
-Here you set the instance variable to skip the cell touch to execute:
+The `touchResult` includes everything you need to take action on the selected string.
+
 ``` Swift
-func contextLabel(contextLabel: ContextLabel, beganTouchOf text: String, with linkRangeResult: LinkRangeResult) {
-    contextLabelTouched = true
+public struct TouchResult {
+    public let linkResult: LinkResult
+    public let touches: Set<UITouch>
+    public let event: UIEvent?
+    public let state: UIGestureRecognizerState
 }
 ```
 
-Here you get the touched text from the label which you pass to MFMailComposeViewController
 ``` Swift
-func contextLabel(contextLabel: ContextLabel, endedTouchOf text: String, with linkRangeResult: LinkRangeResult) {
-    contextLabelTouched = false
-    
-    // text = ... is the touched text 
+public struct LinkResult {
+    public let detectionType: ContextLabel.LinkDetectionType
+    public let range: NSRange
+    public let text: String
+    public let textLink: TextLink?
+}
+```
+
+``` Swift
+public enum LinkDetectionType {
+    case none
+    case userHandle
+    case hashtag
+    case url
+    case textLink
 }
 ```
 
