@@ -256,6 +256,14 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
             setContextLabelDataWithText(text)
         }
     }
+
+    open override var textColor: UIColor! {
+        didSet {
+            _textColor = textColor
+        }
+    }
+
+    fileprivate var _textColor = UIColor.black
     
     // MARK: - Initializations
     
@@ -413,7 +421,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         self.contextLabelData = contextLabelDataWithText(text)
     }
     
-    open func attributesFromProperties() -> [String : AnyObject] {
+    open func attributesFromProperties() -> [String : Any] {
         
         // Shadow attributes
         let shadow = NSShadow()
@@ -424,9 +432,9 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
             shadow.shadowOffset = CGSize(width: 0, height: -1);
             shadow.shadowColor = nil;
         }
-        
+
         // Color attributes
-        var color = self.textColor
+        var color = _textColor
         if self.isEnabled == false {
             color = .lightGray
         } else if self.isHighlighted {
@@ -434,34 +442,33 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
                 color = self.highlightedTextColor!
             }
         }
-        
+
         // Paragraph attributes
         let mutableParagraphStyle = NSMutableParagraphStyle()
         mutableParagraphStyle.alignment = self.textAlignment
-        
+
         // LineSpacing
         if let lineSpacing = lineSpacing {
             mutableParagraphStyle.lineSpacing = lineSpacing
         }
-        
+
         // LineHeightMultiple
         if let lineHeightMultiple = lineHeightMultiple {
             mutableParagraphStyle.lineHeightMultiple = lineHeightMultiple
         }
-        
+
         // Attributes dictionary
-        var attributes = [NSShadowAttributeName: shadow,
-            NSParagraphStyleAttributeName: mutableParagraphStyle] as [String : Any]
-        
+        var attributes: [String : Any] = [
+                NSShadowAttributeName: shadow,
+                NSParagraphStyleAttributeName: mutableParagraphStyle,
+                NSForegroundColorAttributeName: color
+        ]
+
         if let font = self.font {
             attributes[NSFontAttributeName] = font
         }
-        
-        if let color = color {
-            attributes[NSForegroundColorAttributeName] = color
-        }
-        
-        return attributes as [String : AnyObject]
+
+        return attributes
     }
     
     fileprivate func attributesWithTextColor(_ textColor: UIColor) -> [String: Any] {
@@ -473,7 +480,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     
     fileprivate func attributesWithTextColor(_ textColor: UIColor, underlineStyle: NSUnderlineStyle) -> [String: Any] {
         var attributes = attributesWithTextColor(textColor)
-        attributes[NSUnderlineStyleAttributeName] = underlineStyle.rawValue as AnyObject?
+        attributes[NSUnderlineStyleAttributeName] = underlineStyle.rawValue
         
         return attributes
     }
