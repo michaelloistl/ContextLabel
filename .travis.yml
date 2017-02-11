@@ -6,12 +6,12 @@ language: objective-c
 xcode_project: ContextLabel.xcodeproj
 xcode_scheme: ContextLabel
 osx_image: xcode8.2
-xcode_sdk: iphonesimulator10.0
+xcode_sdk: iphonesimulator10.2
 
 before_install:
 - gem install cocoapods --pre --no-rdoc --no-ri --no-document --quiet
 - open -a "simulator" --args -CurrentDeviceUDID `instruments -s devices | sed -n '/^iPhone 6s (10\.0) \[\(.*\)\].*$/s//\1/p'`
 
 script:
-- set -o pipefail && travis_retry xcodebuild clean build test -project ContextLabel.xcodeproj -scheme ContextLabel -destination 'platform=iOS Simulator,name=iPhone 6s,OS=10'
+- set -o pipefail && travis_retry xcodebuild clean build test -project ContextLabel.xcodeproj -scheme ContextLabel -destination 'platform=iOS Simulator,name=iPhone 6s,OS=10.2'
 - pod lib lint
