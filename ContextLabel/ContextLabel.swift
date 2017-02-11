@@ -573,27 +573,22 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
 
     fileprivate func linkResults(for linkType: LinkDetectionType, regexPattern: String, string: String) -> [LinkResult] {
         var linkResults = [LinkResult]()
-
-        // Setup a regular expression for user handles and hashtags
-        let regex: NSRegularExpression?
-        do {
-            regex = try NSRegularExpression(pattern: regexPattern, options: .caseInsensitive)
-        } catch _ as NSError {
-            regex = nil
+        
+        guard let regex = try? NSRegularExpression(pattern: regexPattern, options: .caseInsensitive) else {
+            return linkResults
         }
 
         // Run the expression and get matches
         let nsString = text as NSString
-        if let matches = regex?.matches(in: text, options: .reportCompletion, range: NSMakeRange(0, nsString.length)) {
+        let matches = regex.matches(in: text, options: .reportCompletion, range: NSMakeRange(0, nsString.length))
 
-            // Add all our ranges to the result
-            for match in matches {
-                let matchRange = match.range
-                let matchString = NSString(string: text).substring(with: matchRange)
-                
-                if matchRange.length > 1 {
-                    linkResults.append(LinkResult(detectionType: linkType, range: matchRange, text: matchString, textLink: nil))
-                }
+        // Add all our ranges to the result
+        for match in matches {
+            let matchRange = match.range
+            let matchString = NSString(string: text).substring(with: matchRange)
+            
+            if matchRange.length > 1 {
+                linkResults.append(LinkResult(detectionType: linkType, range: matchRange, text: matchString, textLink: nil))
             }
         }
 
