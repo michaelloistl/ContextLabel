@@ -87,13 +87,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     let hashtagRegex = "(?<=\\s|^)#(\\w*[A-Za-z&_-]+\\w*)"
     let userHandleRegex = "(?<=\\s|^)@(\\w*[A-Za-z&_-]+\\w*)"
     
-    // MARK: - Config Properties
+    // MARK: - Closures
     
-    // LineSpacing
-    public var lineSpacing: CGFloat?
-    public var lineHeightMultiple: CGFloat?
-    
-    // TextColors
     public var foregroundColor: (LinkResult) -> UIColor = { (linkResult) in
         switch linkResult.detectionType {
         case .userHandle:
@@ -113,12 +108,26 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         return nil
     }
     
-    // UnderlineStyle
-    
     public var underlineStyle: (LinkResult) -> (NSUnderlineStyle) = { _ in
         return .styleNone
     }
+
+    public var didTouch: (TouchResult) -> Void = { _ in }
+
+    public var didCopy: (String!) -> Void = { _ in }
+
+    // MARK: - Properties
     
+    // LineSpacing
+    public var lineSpacing: CGFloat?
+    public var lineHeightMultiple: CGFloat?
+
+    public var canCopy: Bool = false {
+        didSet {
+            longPressGestureRecognizer.isEnabled = canCopy
+        }
+    }
+
     // Autolayout
     
     open var preferedHeight: CGFloat? {
@@ -133,19 +142,6 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         }
     }
 
-    // Copy
-    
-    public var canCopy: Bool = false {
-        didSet {
-            longPressGestureRecognizer.isEnabled = canCopy
-        }
-    }
-    
-    // MARK: - Properties
-    
-    public var didTouch: (TouchResult) -> Void = { _ in }
-    public var didCopy: (String!) -> Void = { _ in }
-    
     // Automatic detection of links, hashtags and usernames. When this is enabled links
     // are coloured using the textColor property above
     public var automaticLinkDetectionEnabled: Bool = true {
@@ -639,19 +635,17 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
 
         return linkResults
     }
-    
+
     fileprivate func addLinkAttributesTo(_ attributedString: NSAttributedString, with linkResults: [LinkResult], highlighted: Bool = false) -> NSAttributedString {
         let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
-        
         for linkResult in linkResults {
             let textColor = foregroundColor(linkResult)
             let highlightedTextColor = foregroundHighlightedColor(linkResult)
             let color = (highlighted) ? highlightedTextColor ?? self.highlightedTextColor(textColor) : textColor
             let attributes = attributesWithTextColor(color, underlineStyle: self.underlineStyle(linkResult))
-            
+
             mutableAttributedString.setAttributes(attributes, range: linkResult.range)
         }
-        
         return mutableAttributedString
     }
     
