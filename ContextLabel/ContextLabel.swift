@@ -51,7 +51,7 @@ public struct LinkResult {
 }
 
 public struct TouchResult {
-    public let linkResult: LinkResult
+    public let linkResult: LinkResult?
     public let touches: Set<UITouch>
     public let event: UIEvent?
     public let state: UIGestureRecognizerState
@@ -62,12 +62,14 @@ public struct TextLink {
     public let text: String
     public let range: NSRange?
     public let options: NSString.CompareOptions
+    public let object: Any?
     public let action: ()->()
         
-    public init(text: String, range: NSRange? = nil, options: NSString.CompareOptions = [], action: @escaping ()->()) {
+    public init(text: String, range: NSRange? = nil, options: NSString.CompareOptions = [], object: Any? = nil, action: @escaping ()->()) {
         self.text = text
         self.range = range
         self.options = options
+        self.object = object
         self.action = action
     }
 }
