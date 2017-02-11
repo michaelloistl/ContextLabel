@@ -9,7 +9,9 @@ osx_image: xcode8.2
 xcode_sdk: iphonesimulator10.0
 
 before_install:
-  - gem install cocoapods --pre --no-rdoc --no-ri --no-document --quiet
+- gem install cocoapods --pre --no-rdoc --no-ri --no-document --quiet
+- open -a "simulator" --args -CurrentDeviceUDID `instruments -s devices | sed -n '/^iPhone 6s (10\.0) \[\(.*\)\].*$/s//\1/p'`
 
 script:
-- xcodebuild clean build test -project ContextLabel.xcodeproj -scheme ContextLabelTests
+- set -o pipefail && travis_retry xcodebuild clean build test -project ContextLabel.xcodeproj -scheme ContextLabelTests
+- pod lib lint
