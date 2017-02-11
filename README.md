@@ -60,7 +60,7 @@ TextLink(text: String, range: NSRange? = nil, options: NSString.CompareOptions =
 ```
 
 ## Selection handling
-When tapping on a userHandle, hashtag or url/text link the closure `didTouch: (TouchResult) -> Void` will be called for each touch state:
+When tapping the label, the closure `didTouch: (TouchResult) -> Void` will be called for each touch state:
 
 ``` Swift
 didTouch: { [weak self] (touchResult) in
@@ -75,11 +75,13 @@ didTouch: { [weak self] (touchResult) in
 }
 ```
 
+The touch behaviour changed from version [1.2.0](https://github.com/michaelloistl/ContextLabel/releases/tag/1.2.0).
+
 The `touchResult` includes everything you need to take action on the selected string.
 
 ``` Swift
 public struct TouchResult {
-    public let linkResult: LinkResult
+    public let linkResult: LinkResult?
     public let touches: Set<UITouch>
     public let event: UIEvent?
     public let state: UIGestureRecognizerState
