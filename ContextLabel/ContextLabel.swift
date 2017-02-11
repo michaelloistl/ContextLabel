@@ -333,6 +333,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
             didTouch(TouchResult(linkResult: linkResult, touches: touches, event: event, state: .began))
         } else {
             selectedLinkResult = nil
+            didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .began))
         }
         
         addLinkAttributesToLinkResult(withTouches: touches, highlighted: true)
@@ -358,6 +359,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
                 self.attributedText = addLinkAttributesTo(attributedText, with: [selectedLinkResult], highlighted: false)
             }
             selectedLinkResult = nil
+            didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .changed))
         }
         
         super.touchesMoved(touches, with: event)
@@ -369,6 +371,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         if let selectedLinkResult = selectedLinkResult {
             didTouch(TouchResult(linkResult: selectedLinkResult, touches: touches, event: event, state: .ended))
             selectedLinkResult.textLink?.action()
+        } else {
+            didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .ended))
         }
         
         selectedLinkResult = nil
@@ -378,6 +382,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
 
     open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         addLinkAttributesToLinkResult(withTouches: touches, highlighted: false)
+        
+        didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .cancelled))
         
         super.touchesCancelled(touches, with: event)
     }
