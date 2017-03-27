@@ -118,6 +118,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
 
     // MARK: - Properties
     
+    public var touchState: UIGestureRecognizerState = .possible
+    
     // LineSpacing
     public var lineSpacing: CGFloat?
     public var lineHeightMultiple: CGFloat?
@@ -324,6 +326,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchState = .began
+        
         if let linkResult = linkResult(with: touches) {
             selectedLinkResult = linkResult
             didTouch(TouchResult(linkResult: linkResult, touches: touches, event: event, state: .began))
@@ -338,6 +342,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchState = .changed
+        
         if let linkResult = linkResult(with: touches) {
             if linkResult.range.location != selectedLinkResult?.range.location  {
                 if let selectedLinkResult = selectedLinkResult, let attributedText = attributedText {
@@ -362,6 +368,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchState = .ended
+        
         addLinkAttributesToLinkResult(withTouches: touches, highlighted: false)
 
         if let selectedLinkResult = selectedLinkResult {
@@ -377,6 +385,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
 
     open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchState = .cancelled
+        
         addLinkAttributesToLinkResult(withTouches: touches, highlighted: false)
         
         didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .cancelled))
@@ -656,10 +666,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     fileprivate func linkResult(with touches: Set<UITouch>!) -> LinkResult? {
-        if let touchLocation = touches.first?.location(in: self), let touchedLink = linkResult(at: touchLocation) {
-            return touchedLink
-        }
-        return nil
+        guard let touchLocation = touches.first?.location(in: self) else { return nil }
+        return linkResult(at: touchLocation)
     }
     
     fileprivate func linkResult(at location: CGPoint) -> LinkResult? {
@@ -674,10 +682,11 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
                     
                     if rangeLocation <= characterIndex &&
                         (rangeLocation + rangeLength - 1) >= characterIndex {
-                            
+                        
                             let glyphRange = layoutManager.glyphRange(forCharacterRange: NSMakeRange(rangeLocation, rangeLength), actualCharacterRange: nil)
-                            let boundingRect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: textContainer)
-                            
+                            var boundingRect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: textContainer)
+                            boundingRect.origin.y += (bounds.height - intrinsicContentSize.height) / 2
+                        
                             if boundingRect.contains(location) {
                                 return linkResult
                             }
