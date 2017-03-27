@@ -13,5 +13,5 @@ before_install:
 - open -a "simulator" --args -CurrentDeviceUDID `instruments -s devices | sed -n '/^iPhone 6s (10\.0) \[\(.*\)\].*$/s//\1/p'`
 
 script:
-- set -o pipefail && travis_retry xcodebuild clean build test -project ContextLabel.xcodeproj -destination 'platform=iOS Simulator,name=iPhone 6s,OS=10.0'
+- set -o pipefail && travis_retry xcodebuild clean build test -project ContextLabel.xcodeproj -scheme ContextLabel -destination 'platform=iOS Simulator,name=iPhone 6s,OS=10.0'
 - pod lib lint
