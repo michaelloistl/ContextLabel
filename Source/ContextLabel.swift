@@ -118,6 +118,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
 
     // MARK: - Properties
     
+    public var touchState: UIGestureRecognizerState = .possible
+    
     // LineSpacing
     public var lineSpacing: CGFloat?
     public var lineHeightMultiple: CGFloat?
@@ -324,6 +326,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchState = .began
+        
         if let linkResult = linkResult(with: touches) {
             selectedLinkResult = linkResult
             didTouch(TouchResult(linkResult: linkResult, touches: touches, event: event, state: .began))
@@ -338,6 +342,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchState = .changed
+        
         if let linkResult = linkResult(with: touches) {
             if linkResult.range.location != selectedLinkResult?.range.location  {
                 if let selectedLinkResult = selectedLinkResult, let attributedText = attributedText {
@@ -362,6 +368,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchState = .ended
+        
         addLinkAttributesToLinkResult(withTouches: touches, highlighted: false)
 
         if let selectedLinkResult = selectedLinkResult {
@@ -377,6 +385,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
 
     open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touchState = .cancelled
+        
         addLinkAttributesToLinkResult(withTouches: touches, highlighted: false)
         
         didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .cancelled))
