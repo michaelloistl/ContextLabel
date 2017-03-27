@@ -656,10 +656,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     fileprivate func linkResult(with touches: Set<UITouch>!) -> LinkResult? {
-        if let touchLocation = touches.first?.location(in: self), let touchedLink = linkResult(at: touchLocation) {
-            return touchedLink
-        }
-        return nil
+        guard let touchLocation = touches.first?.location(in: self) else { return nil }
+        return linkResult(at: touchLocation)
     }
     
     fileprivate func linkResult(at location: CGPoint) -> LinkResult? {
