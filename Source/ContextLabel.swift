@@ -249,6 +249,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         didSet {
             textContainer.maximumNumberOfLines = numberOfLines
         }
+    } else {
+      self.contextLabelData = nil
     }
     
     open override var text: String! {
