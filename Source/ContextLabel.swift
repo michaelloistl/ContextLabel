@@ -120,6 +120,10 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     public var touchState: UIGestureRecognizerState = .possible
   let hashtagRegex = "(?<=\\s|^)#(\\w*[a-zA-Z0-9.&_\\-]+\\w*)"
   let userHandleRegex = "(?<=\\s|^)@(\\w*[a-zA-Z0-9.&_\\-]+\\w*)"
+  public var modifiedAttributedString: ((NSAttributedString) -> NSAttributedString)?
+      if let modifiedAttributedString = modifiedAttributedString?(attributedString) {
+        attributedString = modifiedAttributedString
+      }
     
     // LineSpacing
     public var lineSpacing: CGFloat?
