@@ -85,8 +85,6 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         case textLink
     }
     
-    let hashtagRegex = "(?<=\\s|^)#(\\w*[A-Za-z&_-]+\\w*)"
-    let userHandleRegex = "(?<=\\s|^)@(\\w*[A-Za-z&_-]+\\w*)"
     
     // MARK: - Closures
     
@@ -120,6 +118,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     // MARK: - Properties
     
     public var touchState: UIGestureRecognizerState = .possible
+  let hashtagRegex = "(?<=\\s|^)#(\\w*[a-zA-Z0-9.&_\\-]+\\w*)"
+  let userHandleRegex = "(?<=\\s|^)@(\\w*[a-zA-Z0-9.&_\\-]+\\w*)"
     
     // LineSpacing
     public var lineSpacing: CGFloat?
