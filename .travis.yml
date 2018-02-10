@@ -1,17 +1,13 @@
-# references:
-# * http://www.objc.io/issue-6/travis-ci.html
-# * https://github.com/supermarin/xcpretty#usage
-
 language: objective-c
-xcode_project: ContextLabel.xcodeproj
-xcode_scheme: ContextLabel
-osx_image: xcode8.2
-xcode_sdk: iphonesimulator10.0
-
-before_install:
-- gem install cocoapods --pre --no-rdoc --no-ri --no-document --quiet
-- open -a "simulator" --args -CurrentDeviceUDID `instruments -s devices | sed -n '/^iPhone 6s (10\.0) \[\(.*\)\].*$/s//\1/p'`
-
+osx_image: xcode9.1
+install:
+    - gem install cocoapods --pre --no-rdoc --no-ri --no-document --quiet
+    - gem install xcpretty
+    - gem install xcpretty-travis-formatter
 script:
-- set -o pipefail && travis_retry xcodebuild clean build test -project ContextLabel.xcodeproj -scheme ContextLabel -destination 'platform=iOS Simulator,name=iPhone 6s,OS=10.0'
-- pod lib lint
+    - export LC_ALL=en_US.UTF-8
+    - set -o pipefail && xcodebuild clean -project ContextLabel.xcodeproj  -scheme ContextLabel CODE_SIGNING_REQUIRED=NO | xcpretty -f `xcpretty-travis-formatter`
+    - set -o pipefail && xcodebuild test -project ContextLabel.xcodeproj -scheme ContextLabel -destination 'platform=iOS Simulator,name=iPhone 6s,OS=11.1' CODE_SIGNING_REQUIRED=NO | xcpretty -f `xcpretty-travis-formatter`
+notifications:
+  email:
+on_success: never
