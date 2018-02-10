@@ -83,7 +83,7 @@ protocol ContextLabelDelegate: class {
   
   func contextLabel(_ sender: ContextLabel, underlineStyleForLinkResult linkResult: LinkResult) -> NSUnderlineStyle
 
-  func contextLabel(_ sender: ContextLabel, modifiedAttributedString: NSAttributedString) -> NSAttributedString
+  func contextLabel(_ sender: ContextLabel, modifiedAttributedString attributedString: NSAttributedString) -> NSAttributedString
 
   func contextLabel(_ sender: ContextLabel, colorForTextAttachment textAttachment: NSTextAttachment) -> UIColor
 
