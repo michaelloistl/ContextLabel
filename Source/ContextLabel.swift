@@ -73,6 +73,29 @@ public struct TextLink {
   }
 }
 
+protocol ContextLabelDelegate: class {
+  
+  func contextLabel(_ sender: ContextLabel, textFontForLinkResult linkResult: LinkResult) -> UIFont
+  
+  func contextLabel(_ sender: ContextLabel, foregroundColorForLinkResult linkResult: LinkResult) -> UIColor
+  
+  func contextLabel(_ sender: ContextLabel, foregroundHighlightedColorForLinkResult linkResult: LinkResult) -> UIColor
+  
+  func contextLabel(_ sender: ContextLabel, underlineStyleForLinkResult linkResult: LinkResult) -> NSUnderlineStyle
+
+  func contextLabel(_ sender: ContextLabel, modifiedAttributedString: NSAttributedString) -> NSAttributedString
+
+  func contextLabel(_ sender: ContextLabel, colorForTextAttachment textAttachment: NSTextAttachment) -> UIColor
+
+  func contextLabel(_ sender: ContextLabel, prefixForTextAttachment textAttachment: NSTextAttachment) -> String
+
+  func contextLabel(_ sender: ContextLabel, suffixForTextAttachment textAttachment: NSTextAttachment) -> String
+
+  func contextLabel(_ sender: ContextLabel, didTouchWithTouchResult touchResult: TouchResult)
+  
+  func contextLabel(_ sender: ContextLabel, didCopy text: String!)
+}
+
 open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDelegate {
   
   public enum LinkDetectionType {
@@ -87,6 +110,10 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
   let hashtagRegex = "(?<=\\s|^)#(\\w*[a-zA-Z0-9.&_\\-]+\\w*)"
   let userHandleRegex = "(?<=\\s|^)@(\\w*[a-zA-Z0-9.&_\\-]+\\w*)"
 
+  // MARK: - Delegate
+  
+  weak var delegate: ContextLabelDelegate?
+  
   // MARK: - Closures
   
   public var textFont: ((LinkResult) -> UIFont)?
@@ -110,7 +137,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     return nil
   }
   
-  public var underlineStyle: (LinkResult) -> (NSUnderlineStyle) = { _ in
+  public var underlineStyle: (LinkResult) -> NSUnderlineStyle = { _ in
     return .styleNone
   }
   
@@ -318,7 +345,12 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
   
   open override func copy(_ sender: Any?) {
     UIPasteboard.general.string = text
-    didCopy(text)
+    
+    if let delegate = delegate {
+      delegate.contextLabel(self, didCopy: text)
+    } else {
+      didCopy(text)
+    }
   }
   
   open override var intrinsicContentSize : CGSize {
@@ -347,10 +379,20 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     
     if let linkResult = linkResult(with: touches) {
       selectedLinkResult = linkResult
-      didTouch(TouchResult(linkResult: linkResult, touches: touches, event: event, state: .began))
+      let touchResult = TouchResult(linkResult: linkResult, touches: touches, event: event, state: .began)
+      if let delegate = delegate {
+        delegate.contextLabel(self, didTouchWithTouchResult: touchResult)
+      } else {
+        didTouch(touchResult)
+      }
     } else {
       selectedLinkResult = nil
-      didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .began))
+      let touchResult = TouchResult(linkResult: nil, touches: touches, event: event, state: .began)
+      if let delegate = delegate {
+        delegate.contextLabel(self, didTouchWithTouchResult: touchResult)
+      } else {
+        didTouch(touchResult)
+      }
     }
     
     addLinkAttributesToLinkResult(withTouches: touches, highlighted: true)
@@ -372,13 +414,24 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
       
       addLinkAttributesToLinkResult(withTouches: touches, highlighted: true)
       
-      didTouch(TouchResult(linkResult: linkResult, touches: touches, event: event, state: .changed))
+      let touchResult = TouchResult(linkResult: linkResult, touches: touches, event: event, state: .changed)
+      if let delegate = delegate {
+        delegate.contextLabel(self, didTouchWithTouchResult: touchResult)
+      } else {
+        didTouch(touchResult)
+      }
     } else {
       if let selectedLinkResult = selectedLinkResult, let attributedText = attributedText {
         self.attributedText = addLinkAttributesTo(attributedText, with: [selectedLinkResult], highlighted: false)
       }
       selectedLinkResult = nil
-      didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .changed))
+      
+      let touchResult = TouchResult(linkResult: nil, touches: touches, event: event, state: .changed)
+      if let delegate = delegate {
+        delegate.contextLabel(self, didTouchWithTouchResult: touchResult)
+      } else {
+        didTouch(touchResult)
+      }
     }
     
     super.touchesMoved(touches, with: event)
@@ -390,10 +443,20 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     addLinkAttributesToLinkResult(withTouches: touches, highlighted: false)
     
     if let selectedLinkResult = selectedLinkResult {
-      didTouch(TouchResult(linkResult: selectedLinkResult, touches: touches, event: event, state: .ended))
+      let touchResult = TouchResult(linkResult: selectedLinkResult, touches: touches, event: event, state: .ended)
+      if let delegate = delegate {
+        delegate.contextLabel(self, didTouchWithTouchResult: touchResult)
+      } else {
+        didTouch(touchResult)
+      }
       selectedLinkResult.textLink?.action()
     } else {
-      didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .ended))
+      let touchResult = TouchResult(linkResult: nil, touches: touches, event: event, state: .ended)
+      if let delegate = delegate {
+        delegate.contextLabel(self, didTouchWithTouchResult: touchResult)
+      } else {
+        didTouch(touchResult)
+      }
     }
     
     selectedLinkResult = nil
@@ -406,7 +469,12 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     
     addLinkAttributesToLinkResult(withTouches: touches, highlighted: false)
     
-    didTouch(TouchResult(linkResult: nil, touches: touches, event: event, state: .cancelled))
+    let touchResult = TouchResult(linkResult: nil, touches: touches, event: event, state: .cancelled)
+    if let delegate = delegate {
+      delegate.contextLabel(self, didTouchWithTouchResult: touchResult)
+    } else {
+      didTouch(touchResult)
+    }
     
     super.touchesCancelled(touches, with: event)
   }
@@ -441,24 +509,41 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     if let text = text {
       let mutableAttributedString = NSMutableAttributedString(string: text, attributes: attributesFromProperties())
       
-      textAttachments.forEach({ (textAttachment) in
-        let prefix = self.textAttachmentPrefix(textAttachment)
-        let suffix = self.textAttachmentSuffix(textAttachment)
+      textAttachments.forEach { [weak self] (textAttachment) in
+        guard let _self = self else {
+          return
+        }
+        
+        var prefix = _self.textAttachmentPrefix(textAttachment)
+        if let delegate = self?.delegate {
+          prefix = delegate.contextLabel(_self, prefixForTextAttachment: textAttachment)
+        }
+        
+        var suffix = _self.textAttachmentSuffix(textAttachment)
+        if let delegate = self?.delegate {
+          suffix = delegate.contextLabel(_self, suffixForTextAttachment: textAttachment)
+        }
         
         var _attributes = attributesFromProperties()
-        _attributes[.foregroundColor] = self.textAttachmentColor(textAttachment)
+        if let delegate = self?.delegate {
+          _attributes[.foregroundColor] = delegate.contextLabel(_self, colorForTextAttachment: textAttachment)
+        } else {
+          _attributes[.foregroundColor] = _self.textAttachmentColor(textAttachment)
+        }
         
         let _mutableAttributedString = NSMutableAttributedString(string: prefix, attributes: _attributes)
         _mutableAttributedString.append(NSAttributedString(attachment: textAttachment))
         _mutableAttributedString.append(NSAttributedString(string: suffix, attributes: _attributes))
         
         mutableAttributedString.append(_mutableAttributedString)
-      })
+      }
       
       let _linkResults = linkResults(in: mutableAttributedString)
       var attributedString = addLinkAttributesTo(mutableAttributedString, with: _linkResults)
       
-      if let modifiedAttributedString = modifiedAttributedString?(attributedString) {
+      if let delegate = delegate {
+        attributedString = delegate.contextLabel(self, modifiedAttributedString: attributedString)
+      } else if let modifiedAttributedString = modifiedAttributedString?(attributedString) {
         attributedString = modifiedAttributedString
       }
       
@@ -703,11 +788,32 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
   fileprivate func addLinkAttributesTo(_ attributedString: NSAttributedString, with linkResults: [LinkResult], highlighted: Bool = false) -> NSAttributedString {
     let mutableAttributedString = NSMutableAttributedString(attributedString: attributedString)
     for linkResult in linkResults {
-      let font = textFont?(linkResult) ?? self.font
-      let textColor = foregroundColor(linkResult)
-      let highlightedTextColor = foregroundHighlightedColor(linkResult)
+      
+      var font = self.font
+      if let delegate = delegate {
+        font = delegate.contextLabel(self, textFontForLinkResult: linkResult)
+      } else if let textFont = textFont?(linkResult) {
+        font = textFont
+      }
+      
+      var textColor = foregroundColor(linkResult)
+      if let delegate = delegate {
+        textColor = delegate.contextLabel(self, foregroundColorForLinkResult: linkResult)
+      }
+      
+      var highlightedTextColor = foregroundHighlightedColor(linkResult)
+      if let delegate = delegate {
+        highlightedTextColor = delegate.contextLabel(self, foregroundHighlightedColorForLinkResult: linkResult)
+      }
+      
       let color = (highlighted) ? highlightedTextColor ?? self.highlightedTextColor(textColor) : textColor
-      let attributes = self.attributes(with: font, textColor: color, underlineStyle: self.underlineStyle(linkResult))
+      
+      var underlineStyle = self.underlineStyle(linkResult)
+      if let delegate = delegate {
+        underlineStyle = delegate.contextLabel(self, underlineStyleForLinkResult: linkResult)
+      }
+      
+      let attributes = self.attributes(with: font, textColor: color, underlineStyle: underlineStyle)
       
       mutableAttributedString.setAttributes(attributes, range: linkResult.range)
     }
