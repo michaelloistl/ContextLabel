@@ -50,6 +50,21 @@ class ContextLabelTests: XCTestCase {
         XCTAssertEqual(linkResult2.range.length, 5)
     }
     
+    func testLinkDetectionForTextLinksWithEmoji() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = """
+        🙃
+        http://www.bbc.com/news/world-europe-43003740
+        """
+        
+        let linkResults = contextLabel.contextLabelData!.linkResults
+        
+        XCTAssertEqual(linkResults.count, 1)
+        let linkResult1 = linkResults[0]
+        XCTAssertEqual(linkResult1.text, "http://www.bbc.com/news/world-europe-43003740")
+        XCTAssertNil(linkResult1.textLink)
+    }
+    
     func testLinkResultsForTextLinksWithEmojis() {
         let textLink1 = TextLink(text: "link😊", action: { })
         let textLink2 = TextLink(text: "link2", action: { })
