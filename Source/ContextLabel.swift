@@ -625,7 +625,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         }
         
         if let dataDetector = dataDetector {
-            let matches = dataDetector.matches(in: plainText, options: NSRegularExpression.MatchingOptions.reportCompletion, range: NSMakeRange(0, plainText.count))
+            let matches = dataDetector.matches(in: plainText, options: NSRegularExpression.MatchingOptions.reportCompletion, range: NSRange(location: 0, length: plainText.utf16.count))
             
             // Add a range entry for every url we found
             for match in matches {
