@@ -81,6 +81,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         case userHandle
         case hashtag
         case url
+        case email
         case textLink
     }
     
@@ -95,7 +96,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
             return UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
         case .hashtag:
             return UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
-        case .url:
+        case .url, .email:
             return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
         case .textLink:
             return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
@@ -153,7 +154,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     // linkDetectionTypes
-    public var linkDetectionTypes: [LinkDetectionType] = [.userHandle, .hashtag, .url, .textLink] {
+    public var linkDetectionTypes: [LinkDetectionType] = [.userHandle, .hashtag, .url, .textLink, .email] {
         didSet {
             setContextLabelDataWithText(nil)
         }
@@ -533,7 +534,11 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
         }
         
         if linkDetectionTypes.contains(.url) {
-            linkResults += linkResultsForURLs(inAttributedString: attributedString)
+            linkResults += linkResultsForURLs(inAttributedString: attributedString).filter({ $0.detectionType == .url })
+        }
+        
+        if linkDetectionTypes.contains(.email) {
+            linkResults += linkResultsForURLs(inAttributedString: attributedString).filter({ $0.detectionType == .email })
         }
         
         return linkResults
@@ -641,7 +646,11 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
                 
                 if match.resultType == .link {
                     if let matchString = realURL as? String {
-                        linkResults.append(LinkResult(detectionType: .url, range: matchRange, text: matchString, textLink: nil))
+                        if match.url?.scheme == "mailto" {
+                            linkResults.append(LinkResult(detectionType: .email, range: matchRange, text: matchString, textLink: nil))
+                        } else {
+                            linkResults.append(LinkResult(detectionType: .url, range: matchRange, text: matchString, textLink: nil))
+                        }
                     }
                 }
             }
