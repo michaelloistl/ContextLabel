@@ -8,7 +8,7 @@ A simple to use drop in replacement for UILabel written in Swift that provides a
 ContextLabel doesn't have any special dependencies so just include the files ContextLabel.swift in your project. Then use the `ContextLabel` class in replacement for `UILabel`.
 
 ## Text colors
-ContextLabel supports different colors for URLs, twitter style usernames and hashtags. By default the link text colors are set to userHandle RGB(71,90,109), hashtag RGB(151, 154, 158) and url/text links RGB(45, 113, 178).
+ContextLabel supports different colors for URLs, twitter style usernames and hashtags. By default the link text colors are set to userHandle RGB(71,90,109), hashtag RGB(151, 154, 158) and url/email/text links RGB(45, 113, 178).
 
 To set your own text colors, return the desired UIColor within the closure value of `foregroundColor`:
 
@@ -19,7 +19,7 @@ contextLabel.foregroundColor = { (linkResult) in
         return UIColor(red: 71.0/255.0, green: 90.0/255.0, blue: 109.0/255.0, alpha: 1.0)
     case .hashtag:
         return UIColor(red: 151.0/255.0, green: 154.0/255.0, blue: 158.0/255.0, alpha: 1.0)
-    case .url:
+    case .url, .email:
         return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
     case .textLink:
         return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
@@ -103,6 +103,7 @@ public enum LinkDetectionType {
     case userHandle
     case hashtag
     case url
+    case email
     case textLink
 }
 ```
