@@ -196,7 +196,7 @@ class ContextLabelTests: XCTestCase {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "one two three one two three one two one"
         
-        let range = NSMakeRange(0, "one two three on".characters.count)
+        let range = NSMakeRange(0, "one two three on".count)
         
         let oneTextLink = TextLink(text: "one", range: range) { }
         let twoTextLink = TextLink(text: "two", range: range) { }
@@ -211,6 +211,25 @@ class ContextLabelTests: XCTestCase {
         XCTAssertEqual(twoLinkResults.count, 1)
         XCTAssertEqual(threeLinkResults.count, 1)
         XCTAssertEqual(linkResults.count, 1+1+1)
+    }
+    
+    func testEmailDetectionInText() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "Text with test@gmail.com email"
+        
+        let linkResults = contextLabel.contextLabelData!.linkResults
+        XCTAssertEqual(linkResults.count, 1)
+        XCTAssertEqual(linkResults[0].detectionType, .email)
+        XCTAssertEqual(linkResults[0].text, "test@gmail.com")
+    }
+    
+    func testEmailDetectionInTextWhenNotAllowed() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.linkDetectionTypes = [.userHandle, .hashtag, .url, .textLink]
+        contextLabel.text = "Text with test@gmail.com email"
+        
+        let linkResults = contextLabel.contextLabelData!.linkResults
+        XCTAssertEqual(linkResults.count, 0)
     }
      
 }
