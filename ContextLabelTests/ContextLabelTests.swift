@@ -196,7 +196,7 @@ class ContextLabelTests: XCTestCase {
         let contextLabel = ContextLabel(frame: CGRect.zero)
         contextLabel.text = "one two three one two three one two one"
         
-        let range = NSMakeRange(0, "one two three on".characters.count)
+        let range = NSMakeRange(0, "one two three on".count)
         
         let oneTextLink = TextLink(text: "one", range: range) { }
         let twoTextLink = TextLink(text: "two", range: range) { }
