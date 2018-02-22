@@ -105,6 +105,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     case url
     case email
     case textLink
+    case phoneNumber
   }
 
   let hashtagRegex = "(?<=\\s|^)#(\\w*[a-zA-Z0-9.&_\\-]+\\w*)"
@@ -127,6 +128,8 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     case .url, .email:
       return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
     case .textLink:
+      return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+    case .phoneNumber:
       return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
     default:
       return .black
@@ -199,7 +202,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
   }
   
   // linkDetectionTypes
-  public var linkDetectionTypes: [LinkDetectionType] = [.userHandle, .hashtag, .url, .textLink, .email] {
+  public var linkDetectionTypes: [LinkDetectionType] = [.userHandle, .hashtag, .url, .textLink, .email, .phoneNumber] {
     didSet {
       setContextLabelDataWithText(nil)
     }
@@ -662,6 +665,10 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
       linkResults += linkResultsForURLs(inAttributedString: attributedString).filter({ $0.detectionType == .email })
     }
     
+    if linkDetectionTypes.contains(.phoneNumber) {
+        linkResults += linkResultsForPhoneNumbers(inAttributedString: attributedString)
+    }
+    
     return linkResults
   }
   
@@ -738,6 +745,35 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
       }
     }
     
+    return linkResults
+  }
+    
+  fileprivate func linkResultsForPhoneNumbers(inAttributedString attributedString: NSAttributedString) -> [LinkResult] {
+      var linkResults = [LinkResult]()
+        
+      // Use a data detector to find phone numbers in the text
+      let plainText = attributedString.string
+        
+      let dataDetector: NSDataDetector?
+      do {
+          dataDetector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.phoneNumber.rawValue)
+      } catch _ as NSError {
+          dataDetector = nil
+      }
+        
+      if let dataDetector = dataDetector {
+          let matches = dataDetector.matches(in: plainText, options: NSRegularExpression.MatchingOptions.reportCompletion, range: NSRange(location: 0, length: plainText.utf16.count))
+          
+          // Add a range entry for every phone number we found
+          for match in matches {
+              let matchRange = match.range
+              if let range = plainText.rangeFromNSRange(matchRange) {
+                  let phoneNumber = String(plainText[range])
+                  linkResults.append(LinkResult(detectionType: .phoneNumber, range: matchRange, text: phoneNumber, textLink: nil))
+              }
+          }
+      }
+        
     return linkResults
   }
   

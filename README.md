@@ -2,7 +2,7 @@
 
 # ContextLabel
 
-A simple to use drop in replacement for UILabel written in Swift that provides automatic detection of links such as URLs, twitter style usernames and hashtags.
+A simple to use drop in replacement for UILabel written in Swift that provides automatic detection of links such as URLs, phone numbers, twitter style usernames and hashtags.
 
 ## How to use it in your project
 ContextLabel doesn't have any special dependencies so just include the files ContextLabel.swift in your project. Then use the `ContextLabel` class in replacement for `UILabel`.
@@ -40,6 +40,8 @@ contextLabel.foregroundColor = { (linkResult) in
   case .url, .email:
     return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
   case .textLink:
+    return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
+  case .phoneNumber:
     return UIColor(red: 45.0/255.0, green: 113.0/255.0, blue: 178.0/255.0, alpha: 1.0)
   default:
     return .black
@@ -216,6 +218,7 @@ public enum LinkDetectionType {
     case url
     case email
     case textLink
+    case phoneNumber
 }
 ```
 

@@ -231,5 +231,25 @@ class ContextLabelTests: XCTestCase {
         let linkResults = contextLabel.contextLabelData!.linkResults
         XCTAssertEqual(linkResults.count, 0)
     }
+    
+    func testPhoneNumbersDetectionInText() {
+        let contextLabel = ContextLabel(frame: CGRect.zero)
+        contextLabel.text = "Text with 1-541-754-3010 and (541) 754-3010 and +1-541-754-3010 and +420608123456"
+        
+        let linkResults = contextLabel.contextLabelData!.linkResults
+        XCTAssertEqual(linkResults.count, 4)
+        
+        XCTAssertEqual(linkResults[0].detectionType, .phoneNumber)
+        XCTAssertEqual(linkResults[0].text, "1-541-754-3010")
+        
+        XCTAssertEqual(linkResults[1].detectionType, .phoneNumber)
+        XCTAssertEqual(linkResults[1].text, "(541) 754-3010")
+        
+        XCTAssertEqual(linkResults[2].detectionType, .phoneNumber)
+        XCTAssertEqual(linkResults[2].text, "+1-541-754-3010")
+        
+        XCTAssertEqual(linkResults[3].detectionType, .phoneNumber)
+        XCTAssertEqual(linkResults[3].text, "+420608123456")
+    }
      
 }
