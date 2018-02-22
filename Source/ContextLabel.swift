@@ -85,12 +85,6 @@ protocol ContextLabelDelegate: class {
 
   func contextLabel(_ sender: ContextLabel, modifiedAttributedString attributedString: NSAttributedString) -> NSAttributedString
 
-  func contextLabel(_ sender: ContextLabel, colorForTextAttachment textAttachment: NSTextAttachment) -> UIColor
-
-  func contextLabel(_ sender: ContextLabel, prefixForTextAttachment textAttachment: NSTextAttachment) -> String
-
-  func contextLabel(_ sender: ContextLabel, suffixForTextAttachment textAttachment: NSTextAttachment) -> String
-
   func contextLabel(_ sender: ContextLabel, didTouchWithTouchResult touchResult: TouchResult)
   
   func contextLabel(_ sender: ContextLabel, didCopy text: String!)
@@ -146,18 +140,6 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
   
   public var modifiedAttributedString: ((NSAttributedString) -> NSAttributedString)?
   
-  public var textAttachmentColor: (NSTextAttachment) -> UIColor = { (textAttachment) in
-    return UIColor(white: 1, alpha: 0.5)
-  }
-  
-  public var textAttachmentPrefix: (NSTextAttachment) -> String = { (textAttachment) in
-    return ""
-  }
-  
-  public var textAttachmentSuffix: (NSTextAttachment) -> String = { (textAttachment) in
-    return ""
-  }
-  
   public var didTouch: (TouchResult) -> Void = { _ in }
   
   public var didCopy: (String!) -> Void = { _ in }
@@ -175,9 +157,6 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
       longPressGestureRecognizer.isEnabled = canCopy
     }
   }
-  
-  // TextAttachments
-  public var textAttachments: [NSTextAttachment] = []
   
   // Autolayout
   
@@ -511,35 +490,6 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
   open func contextLabelDataWithText(_ text: String?) -> ContextLabelData? {
     if let text = text {
       let mutableAttributedString = NSMutableAttributedString(string: text, attributes: attributesFromProperties())
-      
-      textAttachments.forEach { [weak self] (textAttachment) in
-        guard let _self = self else {
-          return
-        }
-        
-        var prefix = _self.textAttachmentPrefix(textAttachment)
-        if let delegate = self?.delegate {
-          prefix = delegate.contextLabel(_self, prefixForTextAttachment: textAttachment)
-        }
-        
-        var suffix = _self.textAttachmentSuffix(textAttachment)
-        if let delegate = self?.delegate {
-          suffix = delegate.contextLabel(_self, suffixForTextAttachment: textAttachment)
-        }
-        
-        var _attributes = attributesFromProperties()
-        if let delegate = self?.delegate {
-          _attributes[.foregroundColor] = delegate.contextLabel(_self, colorForTextAttachment: textAttachment)
-        } else {
-          _attributes[.foregroundColor] = _self.textAttachmentColor(textAttachment)
-        }
-        
-        let _mutableAttributedString = NSMutableAttributedString(string: prefix, attributes: _attributes)
-        _mutableAttributedString.append(NSAttributedString(attachment: textAttachment))
-        _mutableAttributedString.append(NSAttributedString(string: suffix, attributes: _attributes))
-        
-        mutableAttributedString.append(_mutableAttributedString)
-      }
       
       let _linkResults = linkResults(in: mutableAttributedString)
       var attributedString = addLinkAttributesTo(mutableAttributedString, with: _linkResults)

@@ -90,50 +90,6 @@ func contextLabel(_ sender: ContextLabel, underlineStyleForLinkResult linkResult
 }
 ```
 
-### Text attachments
-From version 1.3 you can set trailing text attachments (images) via the new property `contextLabel.textAttachments: [NSTextAttachment] = [...]`:
-
-You can set the color, a prefix and suffix string for each text attachment via the following closures or delegates:
-
-#### Color
-``` Swift
-contextLabel.textAttachmentColor = { (textAttachment) in
-  return .red
-}
-```
-
-``` Swift
-func contextLabel(_ sender: ContextLabel, colorForTextAttachment textAttachment: NSTextAttachment) -> UIColor
-  return .red
-}
-```
-
-#### Prefix
-``` Swift
-contextLabel.textAttachmentPrefix = { (textAttachment) in
-  return "prefix text"
-}
-```
-
-``` Swift
-func contextLabel(_ sender: ContextLabel, prefixForTextAttachment textAttachment: NSTextAttachment) -> String
-  return "prefix text"
-}
-```
-
-#### Suffix
-``` Swift
-contextLabel.textAttachmentSuffix = { (textAttachment) in
-  return "suffix text"
-}
-```
-
-``` Swift
-func contextLabel(_ sender: ContextLabel, suffixForTextAttachment textAttachment: NSTextAttachment) -> String
-  return "suffix text"
-}
-```
-
 ### Modify attributed string
 From version 1.3 you can also modify the attributed string before it gets finally applied to the label via the following closure or delegate:
 
