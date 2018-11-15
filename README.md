@@ -222,9 +222,11 @@ if let cachedContextLabelData: ContextLabelData = … {
 }          
 ```
 
-## License & Credits
-ContextLabel is available under the MIT license.
+## Maintenance Expectations
+While contributions are always welcome, do not expect a lot of feature evolution beyond the current state. Feel free to fork this library or open pull requests if you'd like to add new features or need fixes and Swift updates.
 
+## License & Credits
+ContextLabel is is released under the [MIT License](https://opensource.org/licenses/MIT).
 ContextLabel was inspired by KILabel (https://github.com/Krelborn/KILabel).
 
 ## Contact
