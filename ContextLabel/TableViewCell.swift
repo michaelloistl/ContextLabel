@@ -45,13 +45,13 @@ class TableViewCell: UITableViewCell {
         _label.underlineStyle = { (linkResult) in
             switch linkResult.detectionType {
             case .userHandle, .hashtag:
-                return .styleDouble
+                return .double
             case .url:
-                return .styleSingle
+                return .single
             case .textLink:
-                return .styleSingle
+                return .single
             default:
-                return .styleNone
+                return []
             }
         }
         
@@ -63,7 +63,7 @@ class TableViewCell: UITableViewCell {
     
     // MARK: - Initializers
     
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         contentView.addSubview(contextLabel)

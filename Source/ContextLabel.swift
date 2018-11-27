@@ -54,7 +54,7 @@ public struct TouchResult {
   public let linkResult: LinkResult?
   public let touches: Set<UITouch>
   public let event: UIEvent?
-  public let state: UIGestureRecognizerState
+  public let state: UIGestureRecognizer.State
 }
 
 public struct TextLink {
@@ -135,18 +135,18 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
   }
   
   public var underlineStyle: (LinkResult) -> NSUnderlineStyle = { _ in
-    return .styleNone
+    return []
   }
   
   public var modifiedAttributedString: ((NSAttributedString) -> NSAttributedString)?
   
   public var didTouch: (TouchResult) -> Void = { _ in }
   
-  public var didCopy: (String!) -> Void = { _ in }
+  public var didCopy: (String?) -> Void = { _ in }
   
   // MARK: - Properties
   
-  public var touchState: UIGestureRecognizerState = .possible
+  public var touchState: UIGestureRecognizer.State = .possible
   
   // LineSpacing
   public var lineSpacing: CGFloat?
@@ -463,7 +463,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
   
   // MARK: - Methods
   
-  func addAttributes(_ attributes: Dictionary<NSAttributedStringKey, Any>, range: NSRange) {
+  func addAttributes(_ attributes: Dictionary<NSAttributedString.Key, Any>, range: NSRange) {
     if let contextLabelData = contextLabelData {
       let mutableAttributedString = NSMutableAttributedString(attributedString: contextLabelData.attributedString)
       mutableAttributedString.addAttributes(attributes, range: range)
@@ -510,7 +510,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     self.textLinks = textLinks
   }
   
-  open func attributesFromProperties() -> [NSAttributedStringKey : Any] {
+  open func attributesFromProperties() -> [NSAttributedString.Key : Any] {
     
     // Shadow attributes
     let shadow = NSShadow()
@@ -547,7 +547,7 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     }
     
     // Attributes dictionary
-    var attributes: [NSAttributedStringKey : Any] = [
+    var attributes: [NSAttributedString.Key : Any] = [
       .shadow: shadow,
       .paragraphStyle: mutableParagraphStyle,
       .foregroundColor: color
@@ -560,14 +560,14 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     return attributes
   }
   
-  fileprivate func attributesWithTextColor(_ textColor: UIColor) -> [NSAttributedStringKey : Any] {
+  fileprivate func attributesWithTextColor(_ textColor: UIColor) -> [NSAttributedString.Key : Any] {
     var attributes = attributesFromProperties()
     attributes[.foregroundColor] = textColor
     
     return attributes
   }
   
-  fileprivate func attributes(with font: UIFont?, textColor: UIColor, underlineStyle: NSUnderlineStyle) -> [NSAttributedStringKey: Any] {
+  fileprivate func attributes(with font: UIFont?, textColor: UIColor, underlineStyle: NSUnderlineStyle) -> [NSAttributedString.Key: Any] {
     var attributes = attributesWithTextColor(textColor)
     attributes[.underlineStyle] = underlineStyle.rawValue
     if let font = font {
