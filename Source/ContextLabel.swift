@@ -87,7 +87,7 @@ protocol ContextLabelDelegate: class {
 
   func contextLabel(_ sender: ContextLabel, didTouchWithTouchResult touchResult: TouchResult)
   
-  func contextLabel(_ sender: ContextLabel, didCopy text: String!)
+  func contextLabel(_ sender: ContextLabel, didCopy text: String?)
 }
 
 open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDelegate {
