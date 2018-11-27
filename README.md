@@ -188,7 +188,7 @@ contextLabel.didCopy = { (text) in
 ```
 
 ``` Swift
-func contextLabel(_ sender: ContextLabel, didCopy text: String!) {
+func contextLabel(_ sender: ContextLabel, didCopy text: String?) {
   
 }
 ```
