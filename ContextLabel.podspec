@@ -7,11 +7,7 @@ Pod::Spec.new do |s|
     s.authors = { 'Michael Loistl' => 'michael@aplo.io' }
     s.homepage = "https://github.com/michaelloistl/ContextLabel"
     s.source = { :git => 'https://github.com/michaelloistl/ContextLabel.git', :tag => s.version }
-
     s.ios.deployment_target = '8.0'
-    s.swift_version         = '4.2'
-
     s.source_files = 'Source/*.{swift}'
-
     s.requires_arc = true
 end
