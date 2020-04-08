@@ -202,7 +202,17 @@ A text link is defined at the minimum by a string `”text link”` and an actio
 TextLink(text: String, range: NSRange? = nil, options: NSString.CompareOptions = [], action: @escaping ()->())
 ```
 
+Example:
 
+``` Swift
+let sampleText = "Lorem ipsum dolor sit amet"
+let textLinks = [
+    TextLink(text: "ipsum") {
+        print("Link tapped")
+    }
+]
+contextLabel.setText(sampleText, textLinks: textLinks)
+```
 
 ## Use of cache
 When setting the text, ContextLabel generates an instance of ’ContextLabelData’ which is a NSObject subclass that can be persisted in order to enable reuse for unchanged data.
