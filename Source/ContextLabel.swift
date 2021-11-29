@@ -73,7 +73,7 @@ public struct TextLink {
   }
 }
 
-protocol ContextLabelDelegate: class {
+protocol ContextLabelDelegate: AnyObject {
   
   func contextLabel(_ sender: ContextLabel, textFontForLinkResult linkResult: LinkResult) -> UIFont
   
@@ -817,33 +817,43 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     return linkResult(at: touchLocation)
   }
   
-  fileprivate func linkResult(at location: CGPoint) -> LinkResult? {
-    var fractionOfDistance: CGFloat = 0.0
-    let characterIndex = layoutManager.characterIndex(for: location, in: textContainer, fractionOfDistanceBetweenInsertionPoints: &fractionOfDistance)
-    
-    if characterIndex <= textStorage?.length {
-      if let linkResults = contextLabelData?.linkResults {
-        for linkResult in linkResults {
-          let rangeLocation = linkResult.range.location
-          let rangeLength = linkResult.range.length
-          
-          if rangeLocation <= characterIndex &&
-            (rangeLocation + rangeLength - 1) >= characterIndex {
-            
-            let glyphRange = layoutManager.glyphRange(forCharacterRange: NSMakeRange(rangeLocation, rangeLength), actualCharacterRange: nil)
-            let boundingRect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: textContainer)
-            // boundingRect.origin.y += (bounds.height - intrinsicContentSize.height) / 2
-            
-            if boundingRect.contains(location) {
-              return linkResult
+    fileprivate func linkResult(at location: CGPoint) -> LinkResult? {
+        var fractionOfDistance: CGFloat = 0.0
+        let characterIndex = layoutManager.characterIndex(for: location, in: textContainer, fractionOfDistanceBetweenInsertionPoints: &fractionOfDistance)
+        if characterIndex <= textStorage?.length {
+            if let linkResults = contextLabelData?.linkResults {
+                for linkResult in linkResults {
+                    if let rect = self.boundingRect(forCharacterRange: linkResult.range) {
+                        if rect.contains(location) {
+                            return linkResult
+                        }
+                    }
+                }
             }
-          }
         }
-      }
+        return nil
     }
     
-    return nil
-  }
+    fileprivate func boundingRect(forCharacterRange range: NSRange) -> CGRect? {
+
+        guard let attributedText = attributedText else { return nil }
+
+        let textStorage = NSTextStorage(attributedString: attributedText)
+        let layoutManager = NSLayoutManager()
+
+        textStorage.addLayoutManager(layoutManager)
+
+        let textContainer = NSTextContainer(size:CGSize(width:self.bounds.size.width, height: CGFloat.greatestFiniteMagnitude))
+        textContainer.lineFragmentPadding = 0.0
+
+        layoutManager.addTextContainer(textContainer)
+
+        var glyphRange = NSRange()
+
+        layoutManager.characterRange(forGlyphRange: range, actualGlyphRange: &glyphRange)
+
+        return layoutManager.boundingRect(forGlyphRange: glyphRange, in: textContainer)
+    }
   
   fileprivate func highlightedTextColor(_ textColor: UIColor) -> UIColor {
     return textColor.withAlphaComponent(0.5)
@@ -855,8 +865,12 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
     if let superview = superview, canCopy, sender.state == .began {
       becomeFirstResponder()
       let menu = UIMenuController.shared
-      menu.setTargetRect(frame, in: superview)
-      menu.setMenuVisible(true, animated: true)
+        if #available(iOS 13.0, *) {
+            menu.showMenu(from: superview, rect: frame)
+        } else {
+            menu.setTargetRect(frame, in: superview)
+            menu.setMenuVisible(true, animated: true)
+        }
     }
   }
 }
