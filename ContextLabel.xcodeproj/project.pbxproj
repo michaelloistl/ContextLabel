@@ -36,7 +36,7 @@
 		6A5EA9731E7BC20900BCEF8C /* ContextLabelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ContextLabelTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A5EA9771E7BC20900BCEF8C /* ContextLabelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextLabelTests.swift; sourceTree = "<group>"; };
 		6A5EA9791E7BC20900BCEF8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		6A5EA9841E7BC31500BCEF8C /* ContextLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextLabel.swift; sourceTree = "<group>"; };
+		6A5EA9841E7BC31500BCEF8C /* ContextLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ContextLabel.swift; path = ContextLabel/ContextLabel.swift; sourceTree = "<group>"; };
 		6AEE5CFF1E894FA700DC85AB /* TableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -82,7 +82,7 @@
 				6A5EA9621E7BC20900BCEF8C /* AppDelegate.swift */,
 				6A5EA9641E7BC20900BCEF8C /* ViewController.swift */,
 				6AEE5CFF1E894FA700DC85AB /* TableViewCell.swift */,
-				6A5EA9831E7BC31500BCEF8C /* Source */,
+				6A5EA9831E7BC31500BCEF8C /* Sources */,
 				6A5EA9821E7BC30800BCEF8C /* Support Files */,
 			);
 			path = ContextLabel;
@@ -107,12 +107,12 @@
 			name = "Support Files";
 			sourceTree = "<group>";
 		};
-		6A5EA9831E7BC31500BCEF8C /* Source */ = {
+		6A5EA9831E7BC31500BCEF8C /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				6A5EA9841E7BC31500BCEF8C /* ContextLabel.swift */,
 			);
-			path = Source;
+			path = Sources;
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
