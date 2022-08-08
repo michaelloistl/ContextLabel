@@ -711,10 +711,6 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
             dataDetector = nil
         }
 
-        if let emergencyNumber = containsEmergencyPhoneNumber(plainText) {
-            linkResults.append(emergencyNumber)
-        }
-
         if let dataDetector = dataDetector {
             let matches = dataDetector.matches(in: plainText, options: NSRegularExpression.MatchingOptions.reportCompletion, range: NSRange(location: 0, length: plainText.utf16.count))
 
@@ -727,33 +723,43 @@ open class ContextLabel: UILabel, NSLayoutManagerDelegate, UIGestureRecognizerDe
                 }
             }
         }
+
+        if let emergencyNumber = containsEmergencyPhoneNumber(plainText) {
+            linkResults.append(emergencyNumber)
+        }
         
         return linkResults
     }
 
     fileprivate func containsEmergencyPhoneNumber(_ text: String) -> LinkResult? {
         if text.contains("911") {
-            guard let matchRange = text.range(of: "911"),
-                    let range = text.NSRangeFromRange(matchRange) else {
+            let ranges = text.ranges(of: "911")
+            guard let range = ranges.first else {
                 return nil
             }
-            return LinkResult(detectionType: .phoneNumber, range: range, text: "911", textLink: nil)
+
+            let location = text.distance(from: text.startIndex, to: range.lowerBound)
+            return LinkResult(detectionType: .phoneNumber, range: NSRange(location: location, length: 3), text: "911", textLink: nil)
         }
 
         if text.contains("999") {
-            guard let matchRange = text.range(of: "999"),
-                    let range = text.NSRangeFromRange(matchRange) else {
+            let ranges = text.ranges(of: "999")
+            guard let range = ranges.first else {
                 return nil
             }
-            return LinkResult(detectionType: .phoneNumber, range: range, text: "999", textLink: nil)
+
+            let location = text.distance(from: text.startIndex, to: range.lowerBound)
+            return LinkResult(detectionType: .phoneNumber, range: NSRange(location: location, length: 3), text: "999", textLink: nil)
         }
 
         if text.contains("112") {
-            guard let matchRange = text.range(of: "112"),
-                    let range = text.NSRangeFromRange(matchRange) else {
+            let ranges = text.ranges(of: "112")
+            guard let range = ranges.first else {
                 return nil
             }
-            return LinkResult(detectionType: .phoneNumber, range: range, text: "112", textLink: nil)
+
+            let location = text.distance(from: text.startIndex, to: range.lowerBound)
+            return LinkResult(detectionType: .phoneNumber, range: NSRange(location: location, length: 3), text: "112", textLink: nil)
         }
 
         return nil
@@ -921,6 +927,30 @@ extension String {
         } else {
             return nil
         }
+    }
+}
+
+extension StringProtocol {
+    func index<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> Index? {
+        range(of: string, options: options)?.lowerBound
+    }
+    func endIndex<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> Index? {
+        range(of: string, options: options)?.upperBound
+    }
+    func indices<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> [Index] {
+        ranges(of: string, options: options).map(\.lowerBound)
+    }
+    func ranges<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> [Range<Index>] {
+        var result: [Range<Index>] = []
+        var startIndex = self.startIndex
+        while startIndex < endIndex,
+            let range = self[startIndex...]
+                .range(of: string, options: options) {
+                result.append(range)
+                startIndex = range.lowerBound < range.upperBound ? range.upperBound :
+                    index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
+        }
+        return result
     }
 }
 
